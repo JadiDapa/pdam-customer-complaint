@@ -1,0 +1,11 @@
+model Customer {
+  id          Int         @id @default(autoincrement())
+  userId      Int         @unique
+  user        User        @relation(fields: [userId], references: [id])
+  customerId  String      @unique
+  phoneNumber String
+  address     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  complaints  Complaint[]
+}

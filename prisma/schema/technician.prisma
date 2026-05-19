@@ -1,0 +1,9 @@
+model Technician {
+    id          Int         @id @default(autoincrement())
+    fullname    String
+    phoneNumber String
+    region      String?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    complaints  Complaint[]
+}

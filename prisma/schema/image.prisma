@@ -1,0 +1,16 @@
+model Image {
+  id          Int        @id @default(autoincrement())
+  url         String
+  complaintId Int?
+  complaint   Complaint? @relation(fields: [complaintId], references: [id])
+  type        ImageType
+  filename    String
+  size        Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum ImageType {
+  COMPLAINT
+  EVIDENCE
+}
