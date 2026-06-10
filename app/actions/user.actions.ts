@@ -7,7 +7,7 @@ import {
 } from "@/servers/validators/user.validator";
 import { UserService } from "@/servers/services/user.service";
 import z from "zod";
-import { clerkClient, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function getCurrentUser() {
@@ -20,6 +20,11 @@ export async function getCurrentUser() {
   const user = await UserService.getByUsername(clerkUser.username);
 
   if (!user) {
+    const { sessionId } = await auth();
+    if (sessionId) {
+      const client = await clerkClient();
+      await client.sessions.revokeSession(sessionId);
+    }
     redirect("/sign-in");
   }
 

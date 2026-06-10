@@ -27,12 +27,12 @@ export default function UserStats({ users }: { users: UserType[] }) {
     },
   ];
   return (
-    <div className="bg-card flex flex-row overflow-hidden rounded-xl border px-6 py-4">
+    <div className="bg-card flex flex-col overflow-hidden rounded-xl border sm:flex-row">
       {stats.map((stat, i) => (
         <div
           key={i}
-          className={`flex flex-1 items-center justify-between p-6 ${
-            i !== stats.length - 1 ? "border-r" : ""
+          className={`flex flex-1 items-center justify-between p-5 sm:p-6 ${
+            i !== stats.length - 1 ? "border-b sm:border-b-0 sm:border-r" : ""
           }`}
         >
           <div className="flex flex-1 items-center gap-4">

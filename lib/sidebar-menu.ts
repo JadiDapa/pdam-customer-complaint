@@ -27,7 +27,7 @@ export const overviewItems = [
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
-    roles: [UserRole.ADMIN, UserRole.LEAD],
+    roles: [UserRole.ADMIN],
   },
   {
     title: "Home",
@@ -39,7 +39,7 @@ export const overviewItems = [
     title: "Daftar Keluhan",
     url: "/dashboard/complaints",
     icon: MessagesSquare,
-    roles: [UserRole.ADMIN, UserRole.LEAD],
+    roles: [UserRole.ADMIN],
   },
   {
     title: "Pengguna",
@@ -47,12 +47,12 @@ export const overviewItems = [
       {
         title: "Pelanggan",
         url: "/dashboard/customers",
-        roles: [UserRole.ADMIN, UserRole.LEAD],
+        roles: [UserRole.ADMIN],
       },
       {
         title: "Teknisi",
         url: "/dashboard/technicians",
-        roles: [UserRole.ADMIN, UserRole.LEAD],
+        roles: [UserRole.ADMIN],
       },
     ],
     icon: Users,

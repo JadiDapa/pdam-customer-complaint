@@ -51,7 +51,7 @@ export default function DashboardSidebar() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <aside className="bg-muted hidden h-screen w-20 shrink-0 flex-col items-center gap-6 py-4 md:flex">
+      <aside className="hidden h-screen w-20 shrink-0 flex-col items-center gap-6 py-4 md:flex">
         {/* ── Theme Toggle ── */}
         <div className="bg-card flex flex-col items-center gap-1 rounded-full p-1">
           <Tooltip>

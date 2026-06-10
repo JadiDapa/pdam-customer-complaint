@@ -1,9 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
-import type {
-  CreateCustomerDTO,
-  UpdateCustomerDTO,
-} from "../validators/customer.validator";
+import type { UpdateCustomerDTO } from "../validators/customer.validator";
 
 export type CustomerListOptions = {
   page?: number;
@@ -83,10 +80,6 @@ export const CustomerService = {
     return await prisma.customer.findUnique({
       where: { userId },
     });
-  },
-
-  async create(data: CreateCustomerDTO) {
-    return prisma.customer.create({ data });
   },
 
   async update(id: number, data: UpdateCustomerDTO) {

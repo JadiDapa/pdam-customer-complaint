@@ -160,7 +160,6 @@ export default function CreateUserDialog() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="LEAD">Lead</SelectItem>
                       <SelectItem value="CUSTOMER">Customer</SelectItem>
                     </SelectContent>
                   </Select>

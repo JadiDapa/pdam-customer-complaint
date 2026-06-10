@@ -27,7 +27,7 @@ export default function DashboardNavbar({ user }: { user: User }) {
         href="/"
         className="group bg-card flex max-w-fit items-center gap-2 rounded-full p-1 pe-3"
       >
-        <div className="bg-primary relative flex size-11 items-center justify-center overflow-hidden rounded-full">
+        <div className="relative flex size-11 items-center justify-center overflow-hidden rounded-full">
           <Image
             src="https://fornews.co/news/inline/2021/02/Logo-PDAM-Tirta-Musi.png"
             fill

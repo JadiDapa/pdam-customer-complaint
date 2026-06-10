@@ -1,11 +1,16 @@
 import { CustomerService } from "@/servers/services/customer.service";
+import { TechnicianService } from "@/servers/services/technician.service";
 import { getCurrentUser } from "@/app/actions/user.actions";
 import { Hash, Phone, MapPin, Calendar, User, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 
-export default async function CustomerProfilePage() {
+export default async function ProfilePage() {
   const user = await getCurrentUser();
-  const customer = await CustomerService.getByUserId(user.id);
+
+  const [customer, technician] = await Promise.all([
+    user.role === "CUSTOMER" ? CustomerService.getByUserId(user.id) : null,
+    user.role === "TECHNICIAN" ? TechnicianService.getByUserId(user.id) : null,
+  ]);
 
   const initials = user.fullname
     .split(" ")
@@ -13,6 +18,13 @@ export default async function CustomerProfilePage() {
     .map((n: string) => n[0])
     .join("")
     .toUpperCase();
+
+  const roleLabel =
+    user.role === "CUSTOMER"
+      ? "Pelanggan"
+      : user.role === "TECHNICIAN"
+        ? "Teknisi"
+        : user.role;
 
   return (
     <div className="space-y-8">
@@ -32,7 +44,7 @@ export default async function CustomerProfilePage() {
         <div className="ml-auto shrink-0">
           <span className="bg-primary/8 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
             <ShieldCheck size={12} />
-            {user.role}
+            {roleLabel}
           </span>
         </div>
       </div>
@@ -55,45 +67,79 @@ export default async function CustomerProfilePage() {
             <InfoRow
               icon={<ShieldCheck size={14} />}
               label="Role"
-              value={user.role}
+              value={roleLabel}
             />
           </dl>
         </section>
 
         {/* Customer data */}
-        <section>
-          <SectionLabel>Data pelanggan</SectionLabel>
-          {customer ? (
-            <dl className="divide-border/50 mt-3 divide-y">
-              <InfoRow
-                icon={<Hash size={14} />}
-                label="Customer ID"
-                value={customer.customerId}
-              />
-              <InfoRow
-                icon={<Phone size={14} />}
-                label="Telepon"
-                value={customer.phoneNumber}
-              />
-              <InfoRow
-                icon={<MapPin size={14} />}
-                label="Alamat"
-                value={customer.address}
-              />
-              <InfoRow
-                icon={<Calendar size={14} />}
-                label="Terdaftar sejak"
-                value={format(new Date(customer.createdAt), "dd MMM yyyy")}
-              />
-            </dl>
-          ) : (
-            <div className="border-border mt-3 rounded-lg border border-dashed py-8 text-center">
-              <p className="text-muted-foreground text-sm">
-                Data pelanggan belum tersedia.
-              </p>
-            </div>
-          )}
-        </section>
+        {user.role === "CUSTOMER" && (
+          <section>
+            <SectionLabel>Data pelanggan</SectionLabel>
+            {customer ? (
+              <dl className="divide-border/50 mt-3 divide-y">
+                <InfoRow
+                  icon={<Hash size={14} />}
+                  label="Customer ID"
+                  value={customer.customerId}
+                />
+                <InfoRow
+                  icon={<Phone size={14} />}
+                  label="Telepon"
+                  value={customer.phoneNumber}
+                />
+                <InfoRow
+                  icon={<MapPin size={14} />}
+                  label="Alamat"
+                  value={customer.address}
+                />
+                <InfoRow
+                  icon={<Calendar size={14} />}
+                  label="Terdaftar sejak"
+                  value={format(new Date(customer.createdAt), "dd MMM yyyy")}
+                />
+              </dl>
+            ) : (
+              <div className="border-border mt-3 rounded-lg border border-dashed py-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                  Data pelanggan belum tersedia.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Technician data */}
+        {user.role === "TECHNICIAN" && (
+          <section>
+            <SectionLabel>Data teknisi</SectionLabel>
+            {technician ? (
+              <dl className="divide-border/50 mt-3 divide-y">
+                <InfoRow
+                  icon={<Phone size={14} />}
+                  label="No. Telepon"
+                  value={technician.phoneNumber}
+                />
+                <InfoRow
+                  icon={<MapPin size={14} />}
+                  label="Wilayah"
+                  value={technician.region ?? "-"}
+                />
+                <InfoRow
+                  icon={<Calendar size={14} />}
+                  label="Terdaftar sejak"
+                  value={format(new Date(technician.createdAt), "dd MMM yyyy")}
+                />
+              </dl>
+            ) : (
+              <div className="border-border mt-3 rounded-lg border border-dashed py-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                  Data teknisi belum tersedia.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );

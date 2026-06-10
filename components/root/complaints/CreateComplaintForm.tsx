@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Customer, DisturbanceType } from "@/generated/prisma";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { X, ImagePlus, UploadCloud } from "lucide-react";
 import { createComplaint } from "@/app/actions/complaint.actions";
 
@@ -53,6 +53,7 @@ export default function CreateComplaintForm({
   customerId?: number;
   customers?: Customer[];
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [images, setImages] = useState<ImagePreview[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -135,7 +136,7 @@ export default function CreateComplaintForm({
           return;
         }
         toast.success("Keluhan berhasil dibuat!");
-        return redirect("/");
+        router.push("/");
       } catch {
         toast.error("Something went wrong");
       }

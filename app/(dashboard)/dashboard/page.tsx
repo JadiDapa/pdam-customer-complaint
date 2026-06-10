@@ -1,7 +1,7 @@
 import { ComplaintService } from "@/servers/services/complaint.service";
 import { getCurrentUser } from "@/app/actions/user.actions";
 import PageHeader from "@/components/root/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import {
   Activity,
@@ -13,50 +13,76 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import DashboardChart from "@/components/root/complaints/DashboardChart";
+import DashboardPerformance from "@/components/root/complaints/DashboardPerformance";
+
+const DISTURBANCE_LABELS: Record<string, string> = {
+  KEBOCORAN_PIPA: "Kebocoran Pipa",
+  AIR_TIDAK_MENGALIR: "Air Tidak Mengalir",
+  AIR_KERUH: "Air Keruh",
+  TEKANAN_RENDAH: "Tekanan Rendah",
+  PIPA_PECAH: "Pipa Pecah",
+  METER_RUSAK: "Meter Rusak",
+  LAINNYA: "Lainnya",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Pending",
+  IN_PROGRESS: "In Progress",
+  RESOLVED: "Selesai",
+  CANCELLED: "Dibatalkan",
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  PENDING: "bg-yellow-500/10 text-yellow-600",
+  IN_PROGRESS: "bg-blue-500/10 text-blue-600",
+  RESOLVED: "bg-green-500/10 text-green-600",
+  CANCELLED: "bg-muted text-muted-foreground",
+};
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser();
 
-  const [stats, dailyData, recentComplaints] = await Promise.all([
+  const [stats, monthlyData, recentComplaints] = await Promise.all([
     ComplaintService.getStats(),
-    ComplaintService.getDailyStats(7),
+    ComplaintService.getDailyStats(30),
     ComplaintService.getRecent(5),
   ]);
 
   const statCards = [
     {
-      label: "Total",
+      label: "Total Keluhan",
       value: stats.total,
       icon: FileText,
-      color: "text-foreground",
-      bg: "bg-muted",
+      trend: `+${stats.todayCount} keluhan hari ini`,
+      trendColor: "text-emerald-600",
     },
     {
-      label: "Pending",
+      label: "Menunggu",
       value: stats.pending,
       icon: Clock,
-      color: "text-yellow-600",
-      bg: "bg-yellow-500/10",
+      trend: "Perlu ditindaklanjuti",
+      trendColor: "text-amber-500",
     },
     {
-      label: "In Progress",
+      label: "Diproses",
       value: stats.inProgress,
       icon: Activity,
-      color: "text-blue-600",
-      bg: "bg-blue-500/10",
+      trend: "Sedang berjalan",
+      trendColor: "text-blue-500",
     },
     {
-      label: "Resolved",
+      label: "Selesai",
       value: stats.resolved,
       icon: CheckCircle2,
-      color: "text-green-600",
-      bg: "bg-green-500/10",
+      trend: "Berhasil diselesaikan",
+      trendColor: "text-emerald-600",
     },
   ];
 
   return (
     <main className="min-h-screen w-full space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title={`Selamat datang, ${user.fullname}!`}
           subtitle="Ringkasan sistem pengaduan PDAM"
@@ -72,83 +98,109 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {statCards.map((s) => (
           <Card key={s.label} className="border-border/60">
-            <CardContent className="flex items-center gap-4 p-5">
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-full ${s.bg}`}
-              >
-                <s.icon className={`size-5 ${s.color}`} />
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <p className="text-muted-foreground text-sm">{s.label}</p>
+                <div className="bg-foreground text-background flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+                  <s.icon className="size-4" />
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground text-xs">{s.label}</p>
-                <p className="text-foreground text-2xl font-bold">{s.value}</p>
-              </div>
+              <p className="text-foreground mt-3 text-3xl font-bold tracking-tight">
+                {s.value}
+              </p>
+              <p className={`mt-1.5 text-xs font-medium ${s.trendColor}`}>
+                {s.trend}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Chart */}
-      <DashboardChart data={dailyData} />
-
-      {/* Recent complaints */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-foreground text-lg font-semibold">
-            Keluhan Terbaru
-          </h2>
-          <Link
-            href="/dashboard/complaints"
-            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-          >
-            Lihat semua →
-          </Link>
+      {/* Chart + Performance */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <DashboardChart data={monthlyData} />
         </div>
-        <div className="flex flex-col gap-3">
-          {recentComplaints.map((c) => (
-            <Link key={c.id} href={`/complaints/${c.id}`}>
-              <div className="group border-border/50 hover:border-border bg-card flex items-center gap-4 rounded-xl border px-4 py-3.5 transition-all">
-                {/* Status stripe */}
-                <div
-                  className={[
-                    "h-8 w-0.5 shrink-0 rounded-full",
-                    c.status === "RESOLVED" ? "bg-green-500" : "bg-border",
-                  ].join(" ")}
-                />
+        <DashboardPerformance stats={stats} />
+      </div>
 
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate text-sm leading-snug font-medium">
-                    {c.title}
+      {/* Recent complaints table */}
+      <Card className="border-border/60">
+        <CardHeader className="px-5 pt-4 pb-3">
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+              Keluhan Terbaru
+            </p>
+            <Link
+              href="/dashboard/complaints"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs transition-colors"
+            >
+              Lihat semua
+              <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="px-0 pb-2">
+          {/* Table header */}
+          <div className="border-border/50 text-muted-foreground mb-1 grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] gap-4 border-b px-5 pb-2 text-xs font-medium uppercase tracking-wide">
+            <span>Pelanggan</span>
+            <span>Judul</span>
+            <span>Jenis Gangguan</span>
+            <span>Status</span>
+            <span className="text-right">Tanggal</span>
+          </div>
+
+          {/* Rows */}
+          <div className="divide-border/40 divide-y">
+            {recentComplaints.map((c) => (
+              <Link key={c.id} href={`/complaints/${c.id}`}>
+                <div className="hover:bg-muted/40 grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] items-center gap-4 px-5 py-3 text-sm transition-colors">
+                  {/* Customer */}
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="bg-muted text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                      {(c.customer?.user.fullname ?? "?")
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-foreground truncate text-sm font-medium">
+                        {c.customer?.user.fullname ?? "-"}
+                      </p>
+                      <p className="text-muted-foreground truncate text-xs">
+                        {c.customer?.user.username ?? "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <p className="text-foreground truncate text-sm">{c.title}</p>
+
+                  {/* Disturbance type */}
+                  <p className="text-muted-foreground truncate text-sm">
+                    {DISTURBANCE_LABELS[c.disturbanceType] ??
+                      c.disturbanceType.replace(/_/g, " ")}
                   </p>
-                  <p className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
-                    <span>{c.disturbanceType.replace(/_/g, " ")}</span>
-                    <span className="bg-border inline-block h-px w-3" />
-                    <span>{format(new Date(c.updatedAt), "dd MMM yyyy")}</span>
+
+                  {/* Status */}
+                  <span
+                    className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[c.status] ?? "bg-muted text-muted-foreground"}`}
+                  >
+                    {STATUS_LABELS[c.status] ?? c.status}
+                  </span>
+
+                  {/* Date */}
+                  <p className="text-muted-foreground text-right text-xs">
+                    {format(new Date(c.createdAt), "dd MMM yyyy")}
                   </p>
                 </div>
-
-                {/* Status badge */}
-                <span
-                  className={[
-                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    c.status === "RESOLVED"
-                      ? "bg-green-500/10 text-green-600"
-                      : "bg-muted text-muted-foreground",
-                  ].join(" ")}
-                >
-                  {c.status === "RESOLVED" ? "Selesai" : "Dibatalkan"}
-                </span>
-
-                {/* Chevron */}
-                <ChevronRight
-                  size={14}
-                  className="text-muted-foreground/40 group-hover:text-muted-foreground shrink-0 transition-colors"
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </main>
   );
 }

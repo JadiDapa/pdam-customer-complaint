@@ -10,16 +10,22 @@ type Props = {
 export default async function CustomerLayout({ children }: Props) {
   const user = await getCurrentUser();
 
-  if (user.role !== "CUSTOMER") {
+  if (user.role === "ADMIN") {
     redirect("/dashboard");
   }
 
   return (
-    <div className="bg-muted min-h-screen w-full">
-      <div className="px-2 pt-2">
-        <CustomerNavbar user={user} />
+    <div
+      className="relative min-h-screen w-full bg-cover bg-fixed bg-center"
+      style={{ backgroundImage: "url('/bg-img.jpg')" }}
+    >
+      <div className="bg-background/50 absolute inset-0" />
+      <div className="relative z-10 min-h-screen">
+        <div className="px-2 pt-2">
+          <CustomerNavbar user={user} />
+        </div>
+        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
       </div>
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
     </div>
   );
 }

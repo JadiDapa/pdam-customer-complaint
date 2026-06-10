@@ -79,6 +79,12 @@ export const TechnicianService = {
     });
   },
 
+  async getByUserId(userId: number) {
+    return await prisma.technician.findUnique({
+      where: { userId },
+    });
+  },
+
   async create(data: CreateTechnicianDTO) {
     return prisma.technician.create({ data });
   },

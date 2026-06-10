@@ -8,13 +8,19 @@ const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 const isApiRoute = createRouteMatcher(["/api(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req) || isApiRoute(req)) return;
+  if (isApiRoute(req)) return;
 
   const { userId } = await auth();
 
+  if (isPublicRoute(req)) {
+    if (userId) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return;
+  }
+
   if (!userId) {
-    const signInUrl = new URL("/sign-in", req.url);
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 });
 

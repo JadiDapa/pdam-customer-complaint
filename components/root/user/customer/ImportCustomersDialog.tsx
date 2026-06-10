@@ -23,14 +23,7 @@ import {
   type ImportResult,
 } from "@/app/actions/customer.actions";
 
-const EXPECTED_COLS = [
-  "fullname",
-  "username",
-  "password",
-  "customerId",
-  "phoneNumber",
-  "address",
-];
+const EXPECTED_COLS = ["fullname", "customerId", "phoneNumber", "address"];
 
 export default function ImportCustomersDialog() {
   const [open, setOpen] = useState(false);
@@ -70,8 +63,6 @@ export default function ImportCustomersDialog() {
 
         const parsed: ImportRow[] = json.map((r) => ({
           fullname: String(r["fullname"] ?? "").trim(),
-          username: String(r["username"] ?? "").trim(),
-          password: String(r["password"] ?? "").trim(),
           customerId: String(r["customerId"] ?? "").trim(),
           phoneNumber: String(r["phoneNumber"] ?? "").trim(),
           address: String(r["address"] ?? "").trim(),
@@ -143,12 +134,19 @@ export default function ImportCustomersDialog() {
 
         <div className="space-y-4">
           {/* Template hint */}
-          <p className="text-muted-foreground text-xs">
-            File harus memiliki kolom:{" "}
-            <span className="text-foreground font-mono">
-              {EXPECTED_COLS.join(", ")}
-            </span>
-          </p>
+          <div className="space-y-1">
+            <p className="text-muted-foreground text-xs">
+              File harus memiliki kolom:{" "}
+              <span className="text-foreground font-mono">
+                {EXPECTED_COLS.join(", ")}
+              </span>
+            </p>
+            <p className="text-muted-foreground text-xs">
+              Login pelanggan:{" "}
+              <span className="text-foreground">username = phoneNumber</span>,{" "}
+              <span className="text-foreground">password = customerId</span>
+            </p>
+          </div>
 
           {/* Drop zone */}
           <div
@@ -201,13 +199,9 @@ export default function ImportCustomersDialog() {
                     {rows.slice(0, 5).map((r, i) => (
                       <tr key={i} className="border-border/40 border-t">
                         <td className="px-3 py-1.5">{r.fullname}</td>
-                        <td className="px-3 py-1.5">{r.username}</td>
-                        <td className="text-muted-foreground px-3 py-1.5">
-                          {"•".repeat(Math.min(r.password.length, 8))}
-                        </td>
                         <td className="px-3 py-1.5">{r.customerId}</td>
                         <td className="px-3 py-1.5">{r.phoneNumber}</td>
-                        <td className="max-w-[120px] truncate px-3 py-1.5">
+                        <td className="max-w-30 truncate px-3 py-1.5">
                           {r.address}
                         </td>
                       </tr>
@@ -215,7 +209,7 @@ export default function ImportCustomersDialog() {
                     {rows.length > 5 && (
                       <tr className="border-border/40 border-t">
                         <td
-                          colSpan={6}
+                          colSpan={4}
                           className="text-muted-foreground px-3 py-1.5 text-center"
                         >
                           +{rows.length - 5} baris lagi
@@ -232,7 +226,8 @@ export default function ImportCustomersDialog() {
           {importResult && importResult.failed.length > 0 && (
             <div className="space-y-1">
               <p className="text-xs font-medium text-red-600">
-                {importResult.success} berhasil, {importResult.failed.length} baris gagal:
+                {importResult.success} berhasil, {importResult.failed.length}{" "}
+                baris gagal:
               </p>
               <div className="max-h-36 overflow-auto rounded-lg border border-red-200 bg-red-500/5 text-xs">
                 {importResult.failed.map((f) => (

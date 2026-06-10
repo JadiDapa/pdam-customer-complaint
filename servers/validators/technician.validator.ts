@@ -19,9 +19,17 @@ const TechnicianBaseSchema = z.object({
   region: z.string().min(1),
 });
 
-export const CreateTechnicianSchema = TechnicianBaseSchema.extend({});
+export const CreateTechnicianSchema = TechnicianBaseSchema.extend({
+  userId: z.number().optional(),
+});
+
+export const CreateTechnicianAccountSchema = TechnicianBaseSchema.extend({
+  username: z.string().min(1),
+  password: z.string().min(8, "Password minimal 8 karakter"),
+});
 
 export const UpdateTechnicianSchema = TechnicianBaseSchema.partial();
 
 export type CreateTechnicianDTO = z.infer<typeof CreateTechnicianSchema>;
+export type CreateTechnicianAccountDTO = z.infer<typeof CreateTechnicianAccountSchema>;
 export type UpdateTechnicianDTO = z.infer<typeof UpdateTechnicianSchema>;

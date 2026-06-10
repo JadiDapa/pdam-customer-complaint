@@ -16,16 +16,18 @@ export const CustomerSearchSchema = z.object({
   search: z.string().min(1).max(50).optional(),
 });
 
-const CustomerBaseSchema = z.object({
-  userId: z.number(),
+export const CreateCustomerSchema = z.object({
+  fullname: z.string().min(1),
   customerId: z.string().min(1),
   phoneNumber: z.string().min(1),
   address: z.string().min(1),
 });
 
-export const CreateCustomerSchema = CustomerBaseSchema.extend({});
-
-export const UpdateCustomerSchema = CustomerBaseSchema.partial();
+export const UpdateCustomerSchema = z.object({
+  customerId: z.string().min(1).optional(),
+  phoneNumber: z.string().min(1).optional(),
+  address: z.string().min(1).optional(),
+});
 
 export type CreateCustomerDTO = z.infer<typeof CreateCustomerSchema>;
 export type UpdateCustomerDTO = z.infer<typeof UpdateCustomerSchema>;

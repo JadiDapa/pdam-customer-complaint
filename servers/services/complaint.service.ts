@@ -4,9 +4,7 @@ import type {
   CreateComplaintDTO,
   UpdateComplaintDTO,
 } from "../validators/complaint.validator";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const complaintInclude = {
   customer: { include: { user: true } },
@@ -166,9 +164,6 @@ export const ComplaintService = {
       }
     }
 
-    const uploadDir = path.join(process.cwd(), "uploads", "images");
-    await mkdir(uploadDir, { recursive: true });
-
     const imageRecords: {
       url: string;
       filename: string;
@@ -177,16 +172,11 @@ export const ComplaintService = {
     }[] = [];
 
     for (const file of images) {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const uniqueFilename = `${randomUUID()}.${ext}`;
-      const filepath = path.join(uploadDir, uniqueFilename);
-
       const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filepath, buffer);
-
+      const result = await uploadToCloudinary(buffer, { resource_type: "image" });
       imageRecords.push({
-        url: `/api/images/${uniqueFilename}`,
-        filename: uniqueFilename,
+        url: result.secure_url,
+        filename: result.public_id,
         size: file.size,
         type: "COMPLAINT",
       });
@@ -226,9 +216,6 @@ export const ComplaintService = {
   },
 
   async submitEvidence(id: number, images: File[]) {
-    const uploadDir = path.join(process.cwd(), "uploads", "images");
-    await mkdir(uploadDir, { recursive: true });
-
     const imageRecords: {
       url: string;
       filename: string;
@@ -237,14 +224,11 @@ export const ComplaintService = {
     }[] = [];
 
     for (const file of images) {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const uniqueFilename = `${randomUUID()}.${ext}`;
-      const filepath = path.join(uploadDir, uniqueFilename);
       const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filepath, buffer);
+      const result = await uploadToCloudinary(buffer, { resource_type: "image" });
       imageRecords.push({
-        url: `/api/images/${uniqueFilename}`,
-        filename: uniqueFilename,
+        url: result.secure_url,
+        filename: result.public_id,
         size: file.size,
         type: "EVIDENCE",
       });

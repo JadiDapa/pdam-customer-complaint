@@ -76,6 +76,7 @@ const DataTable: React.FC<DataTableProps<any, any>> = ({
 
       <div className="bg-muted my-2 h-px w-full" />
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -118,6 +119,7 @@ const DataTable: React.FC<DataTableProps<any, any>> = ({
           )}
         </TableBody>
       </Table>
+      </div>
 
       {!hidePagination && <TablePagination table={table} />}
     </div>

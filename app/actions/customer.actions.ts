@@ -13,14 +13,46 @@ import { clerkClient } from "@clerk/nextjs/server";
 export async function createCustomer(
   input: z.input<typeof CreateCustomerSchema>,
 ) {
-  const data = CreateCustomerSchema.parse({
-    userId: input.userId,
-    customerId: input.customerId,
-    phoneNumber: input.phoneNumber,
-    address: input.address,
-  });
+  const { fullname, customerId, phoneNumber, address } =
+    CreateCustomerSchema.parse(input);
 
-  await CustomerService.create(data);
+  const client = await clerkClient();
+  let clerkUserId: string | null = null;
+
+  try {
+    const clerkUsername = `p${phoneNumber}`;
+
+    const existingPhone = await prisma.user.findUnique({
+      where: { username: clerkUsername },
+    });
+    if (existingPhone) throw new Error("Nomor telepon sudah terdaftar");
+
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { customerId },
+    });
+    if (existingCustomer) throw new Error("ID Pelanggan sudah terdaftar");
+
+    const clerkUser = await client.users.createUser({
+      username: clerkUsername,
+      firstName: fullname,
+      password: customerId,
+    });
+    clerkUserId = clerkUser.id;
+
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { fullname, username: clerkUsername, role: "CUSTOMER" },
+      });
+      await tx.customer.create({
+        data: { userId: user.id, customerId, phoneNumber, address },
+      });
+    });
+  } catch (e) {
+    if (clerkUserId) {
+      await client.users.deleteUser(clerkUserId).catch(() => {});
+    }
+    throw e;
+  }
 
   revalidatePath("/dashboard/customers");
 }
@@ -30,24 +62,17 @@ export async function updateCustomer(
   input: z.input<typeof UpdateCustomerSchema>,
 ) {
   const data = UpdateCustomerSchema.parse(input);
-
-  await CustomerService.update(customerId, {
-    ...data,
-  });
-
+  await CustomerService.update(customerId, data);
   revalidatePath("/dashboard/customers");
 }
 
 export async function deleteCustomer(customerId: number) {
   await CustomerService.delete(customerId);
-
   revalidatePath("/dashboard/customers");
 }
 
 export type ImportRow = {
   fullname: string;
-  username: string;
-  password: string;
   customerId: string;
   phoneNumber: string;
   address: string;
@@ -66,39 +91,54 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
     const row = rows[i];
     let clerkUserId: string | null = null;
     try {
-      const { fullname, username, password, customerId, phoneNumber, address } = row;
-      if (!fullname || !username || !password || !customerId || !phoneNumber || !address) {
+      const { fullname, customerId, phoneNumber, address } = row;
+      if (!fullname || !customerId || !phoneNumber || !address) {
         result.failed.push({ row: i + 2, reason: "Missing required fields" });
         continue;
       }
 
-      if (password.length < 8) {
-        result.failed.push({ row: i + 2, reason: "Password minimal 8 karakter" });
+      if (customerId.length < 8) {
+        result.failed.push({
+          row: i + 2,
+          reason: "ID Pelanggan minimal 8 karakter",
+        });
         continue;
       }
 
-      const existing = await prisma.user.findUnique({ where: { username } });
-      if (existing) {
-        result.failed.push({ row: i + 2, reason: `Username "${username}" already exists` });
+      const clerkUsername = `p${phoneNumber}`;
+
+      const existingPhone = await prisma.user.findUnique({
+        where: { username: clerkUsername },
+      });
+      if (existingPhone) {
+        result.failed.push({
+          row: i + 2,
+          reason: `Nomor telepon "${phoneNumber}" sudah terdaftar`,
+        });
         continue;
       }
 
-      const existingCustomer = await prisma.customer.findUnique({ where: { customerId } });
+      const existingCustomer = await prisma.customer.findUnique({
+        where: { customerId },
+      });
       if (existingCustomer) {
-        result.failed.push({ row: i + 2, reason: `Customer ID "${customerId}" already exists` });
+        result.failed.push({
+          row: i + 2,
+          reason: `ID Pelanggan "${customerId}" sudah terdaftar`,
+        });
         continue;
       }
 
       const clerkUser = await client.users.createUser({
-        username,
+        username: clerkUsername,
         firstName: fullname,
-        password,
+        password: customerId,
       });
       clerkUserId = clerkUser.id;
 
       await prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
-          data: { fullname, username, role: "CUSTOMER" },
+          data: { fullname, username: clerkUsername, role: "CUSTOMER" },
         });
         await tx.customer.create({
           data: { userId: user.id, customerId, phoneNumber, address },
@@ -111,12 +151,24 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
         await client.users.deleteUser(clerkUserId).catch(() => {});
       }
       let reason = e instanceof Error ? e.message : "Unknown error";
-      if (e && typeof e === "object" && "errors" in e && Array.isArray((e as { errors: unknown[] }).errors)) {
-        const clerkErrors = (e as { errors: { longMessage?: string; message?: string; code?: string }[] }).errors;
-        const detail = clerkErrors.map((err) => err.longMessage || err.message || err.code).filter(Boolean).join("; ");
+      if (
+        e &&
+        typeof e === "object" &&
+        "errors" in e &&
+        Array.isArray((e as { errors: unknown[] }).errors)
+      ) {
+        const clerkErrors = (
+          e as {
+            errors: { longMessage?: string; message?: string; code?: string }[];
+          }
+        ).errors;
+        const detail = clerkErrors
+          .map((err) => err.longMessage || err.message || err.code)
+          .filter(Boolean)
+          .join("; ");
         if (detail) reason = detail;
       }
-      console.error(`[importCustomers] Row ${i + 2} (${row.username}) failed:`, e);
+      console.error(`[importCustomers] Row ${i + 2} failed:`, e);
       result.failed.push({ row: i + 2, reason });
     }
   }
