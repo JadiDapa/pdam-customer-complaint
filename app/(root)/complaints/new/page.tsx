@@ -33,7 +33,23 @@ export default async function NewComplaintPage() {
         />
       </div>
 
-      {hasActive ? (
+      {!customer ? (
+        <Card className="max-w-lg border-red-500/30 bg-red-500/5">
+          <CardContent className="flex flex-col items-start gap-4 p-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-600" />
+              <div>
+                <p className="text-foreground font-semibold">
+                  Akun tidak terhubung ke data pelanggan
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Hubungi admin untuk memastikan akun Anda terdaftar sebagai pelanggan.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : hasActive ? (
         <Card className="max-w-lg border-yellow-500/30 bg-yellow-500/5">
           <CardContent className="flex flex-col items-start gap-4 p-6">
             <div className="flex items-start gap-3">
@@ -57,7 +73,7 @@ export default async function NewComplaintPage() {
           </CardContent>
         </Card>
       ) : (
-        <CreateComplaintForm customerId={customer?.id} />
+        <CreateComplaintForm customerId={customer.id} />
       )}
     </main>
   );

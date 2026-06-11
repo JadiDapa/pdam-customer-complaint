@@ -22,7 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Customer, DisturbanceType } from "@/generated/prisma";
+import { DisturbanceType, Prisma } from "@/generated/prisma";
+
+type CustomerWithUser = Prisma.CustomerGetPayload<{ include: { user: true } }>;
 import { useRouter } from "next/navigation";
 import { X, ImagePlus, UploadCloud } from "lucide-react";
 import { createComplaint } from "@/app/actions/complaint.actions";
@@ -51,7 +53,7 @@ export default function CreateComplaintForm({
 }: {
   technicianId?: number;
   customerId?: number;
-  customers?: Customer[];
+  customers?: CustomerWithUser[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -151,7 +153,8 @@ export default function CreateComplaintForm({
             <Controller
               name="customerId"
               control={form.control}
-              render={({ field }) => (
+              rules={{ required: true }}
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel>Customer</FieldLabel>
                   <Select
@@ -159,16 +162,24 @@ export default function CreateComplaintForm({
                     onValueChange={(v) => field.onChange(Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={"Pilih Customer..."} />
+                      <SelectValue placeholder="Pilih Customer..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {customers.map((b) => (
-                        <SelectItem key={b.id} value={b.id.toString()}>
-                          {b.customerId}
+                      {customers.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.user.fullname}{" "}
+                          <span className="text-muted-foreground">
+                            ({c.customerId})
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {fieldState.error && (
+                    <p className="text-destructive mt-1 text-xs">
+                      Pilih customer terlebih dahulu
+                    </p>
+                  )}
                 </Field>
               )}
             />

@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: Props) {
         className="relative flex min-h-screen w-full flex-col bg-cover bg-fixed bg-center"
         style={{ backgroundImage: "url('/bg-img.jpg')" }}
       >
-        <div className="bg-background/50 absolute inset-0" />
+        <div className="bg-background/70 absolute inset-0" />
         <div className="relative z-10 flex min-h-screen w-full flex-col">
           <div className="px-2 pt-2">
             <DashboardMobileHeader user={user} />

@@ -141,13 +141,15 @@ export default async function CustomerDetailPage({ params }: PageProps) {
   );
 }
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | null | undefined }) {
   return (
     <div className="flex items-start gap-2 px-3 py-2.5">
       <span className="text-muted-foreground mt-0.5 shrink-0">{icon}</span>
       <div className="min-w-0">
         <p className="text-muted-foreground text-xs">{label}</p>
-        <p className="text-foreground truncate text-sm">{value}</p>
+        <p className={`truncate text-sm ${value ? "text-foreground" : "text-muted-foreground"}`}>
+          {value ?? "—"}
+        </p>
       </div>
     </div>
   );

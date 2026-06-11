@@ -18,8 +18,9 @@ export const CustomerSearchSchema = z.object({
 
 export const CreateCustomerSchema = z.object({
   fullname: z.string().min(1),
+  username: z.string().min(1),
   customerId: z.string().min(1),
-  phoneNumber: z.string().min(1),
+  phoneNumber: z.string().optional(),
   address: z.string().min(1),
 });
 

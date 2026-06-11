@@ -13,8 +13,7 @@ export default async function SignInPage() {
       const dbUser = await UserService.getByUsername(clerkUser.username);
       if (dbUser) redirect("/");
     }
-    // Authenticated in Clerk but no username or missing DB record —
-    // fall through to show the sign-in form and avoid a redirect loop
+
   }
 
   return (

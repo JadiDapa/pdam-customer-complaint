@@ -23,7 +23,7 @@ import {
   type ImportResult,
 } from "@/app/actions/customer.actions";
 
-const EXPECTED_COLS = ["fullname", "customerId", "phoneNumber", "address"];
+const REQUIRED_COLS = ["fullname", "username", "customerId", "address"];
 
 export default function ImportCustomersDialog() {
   const [open, setOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function ImportCustomersDialog() {
         }
 
         const headers = Object.keys(json[0]).map((h) => h.trim().toLowerCase());
-        const missing = EXPECTED_COLS.filter(
+        const missing = REQUIRED_COLS.filter(
           (c) => !headers.includes(c.toLowerCase()),
         );
         if (missing.length > 0) {
@@ -63,8 +63,9 @@ export default function ImportCustomersDialog() {
 
         const parsed: ImportRow[] = json.map((r) => ({
           fullname: String(r["fullname"] ?? "").trim(),
+          username: String(r["username"] ?? "").trim(),
           customerId: String(r["customerId"] ?? "").trim(),
-          phoneNumber: String(r["phoneNumber"] ?? "").trim(),
+          phoneNumber: String(r["phoneNumber"] ?? "").trim() || undefined,
           address: String(r["address"] ?? "").trim(),
         }));
 
@@ -136,14 +137,18 @@ export default function ImportCustomersDialog() {
           {/* Template hint */}
           <div className="space-y-1">
             <p className="text-muted-foreground text-xs">
-              File harus memiliki kolom:{" "}
+              Kolom wajib:{" "}
               <span className="text-foreground font-mono">
-                {EXPECTED_COLS.join(", ")}
+                {REQUIRED_COLS.join(", ")}
               </span>
             </p>
             <p className="text-muted-foreground text-xs">
+              Kolom opsional:{" "}
+              <span className="text-foreground font-mono">phoneNumber</span>
+            </p>
+            <p className="text-muted-foreground text-xs">
               Login pelanggan:{" "}
-              <span className="text-foreground">username = phoneNumber</span>,{" "}
+              <span className="text-foreground">username = username</span>,{" "}
               <span className="text-foreground">password = customerId</span>
             </p>
           </div>
@@ -188,7 +193,7 @@ export default function ImportCustomersDialog() {
                 <table className="w-full">
                   <thead className="bg-muted sticky top-0">
                     <tr>
-                      {EXPECTED_COLS.map((c) => (
+                      {REQUIRED_COLS.map((c) => (
                         <th key={c} className="px-3 py-2 text-left font-medium">
                           {c}
                         </th>
@@ -199,8 +204,8 @@ export default function ImportCustomersDialog() {
                     {rows.slice(0, 5).map((r, i) => (
                       <tr key={i} className="border-border/40 border-t">
                         <td className="px-3 py-1.5">{r.fullname}</td>
+                        <td className="px-3 py-1.5">{r.username}</td>
                         <td className="px-3 py-1.5">{r.customerId}</td>
-                        <td className="px-3 py-1.5">{r.phoneNumber}</td>
                         <td className="max-w-30 truncate px-3 py-1.5">
                           {r.address}
                         </td>

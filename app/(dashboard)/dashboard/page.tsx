@@ -128,7 +128,7 @@ export default async function AdminDashboardPage() {
       <Card className="border-border/60">
         <CardHeader className="px-5 pt-4 pb-3">
           <div className="flex items-center justify-between">
-            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               Keluhan Terbaru
             </p>
             <Link
@@ -142,7 +142,7 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent className="px-0 pb-2">
           {/* Table header */}
-          <div className="border-border/50 text-muted-foreground mb-1 grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] gap-4 border-b px-5 pb-2 text-xs font-medium uppercase tracking-wide">
+          <div className="border-border/50 text-muted-foreground mb-1 grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] gap-4 border-b px-5 pb-2 text-xs font-medium tracking-wide uppercase">
             <span>Pelanggan</span>
             <span>Judul</span>
             <span>Jenis Gangguan</span>
@@ -153,7 +153,7 @@ export default async function AdminDashboardPage() {
           {/* Rows */}
           <div className="divide-border/40 divide-y">
             {recentComplaints.map((c) => (
-              <Link key={c.id} href={`/complaints/${c.id}`}>
+              <Link key={c.id} href={`/dashboard/complaints/${c.id}`}>
                 <div className="hover:bg-muted/40 grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] items-center gap-4 px-5 py-3 text-sm transition-colors">
                   {/* Customer */}
                   <div className="flex min-w-0 items-center gap-2.5">

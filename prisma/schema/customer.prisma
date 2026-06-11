@@ -3,7 +3,7 @@ model Customer {
   userId      Int         @unique
   user        User        @relation(fields: [userId], references: [id])
   customerId  String      @unique
-  phoneNumber String
+  phoneNumber String?
   address     String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

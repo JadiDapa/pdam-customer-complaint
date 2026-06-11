@@ -13,19 +13,17 @@ import { clerkClient } from "@clerk/nextjs/server";
 export async function createCustomer(
   input: z.input<typeof CreateCustomerSchema>,
 ) {
-  const { fullname, customerId, phoneNumber, address } =
+  const { fullname, username, customerId, phoneNumber, address } =
     CreateCustomerSchema.parse(input);
 
   const client = await clerkClient();
   let clerkUserId: string | null = null;
 
   try {
-    const clerkUsername = `p${phoneNumber}`;
-
-    const existingPhone = await prisma.user.findUnique({
-      where: { username: clerkUsername },
+    const existingUsername = await prisma.user.findUnique({
+      where: { username },
     });
-    if (existingPhone) throw new Error("Nomor telepon sudah terdaftar");
+    if (existingUsername) throw new Error("Username sudah terdaftar");
 
     const existingCustomer = await prisma.customer.findUnique({
       where: { customerId },
@@ -33,7 +31,7 @@ export async function createCustomer(
     if (existingCustomer) throw new Error("ID Pelanggan sudah terdaftar");
 
     const clerkUser = await client.users.createUser({
-      username: clerkUsername,
+      username,
       firstName: fullname,
       password: customerId,
     });
@@ -41,10 +39,15 @@ export async function createCustomer(
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { fullname, username: clerkUsername, role: "CUSTOMER" },
+        data: { fullname, username, role: "CUSTOMER" },
       });
       await tx.customer.create({
-        data: { userId: user.id, customerId, phoneNumber, address },
+        data: {
+          userId: user.id,
+          customerId,
+          phoneNumber: phoneNumber || null,
+          address,
+        },
       });
     });
   } catch (e) {
@@ -73,8 +76,9 @@ export async function deleteCustomer(customerId: number) {
 
 export type ImportRow = {
   fullname: string;
+  username: string;
   customerId: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   address: string;
 };
 
@@ -91,8 +95,8 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
     const row = rows[i];
     let clerkUserId: string | null = null;
     try {
-      const { fullname, customerId, phoneNumber, address } = row;
-      if (!fullname || !customerId || !phoneNumber || !address) {
+      const { fullname, username, customerId, phoneNumber, address } = row;
+      if (!fullname || !username || !customerId || !address) {
         result.failed.push({ row: i + 2, reason: "Missing required fields" });
         continue;
       }
@@ -105,15 +109,13 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
         continue;
       }
 
-      const clerkUsername = `p${phoneNumber}`;
-
-      const existingPhone = await prisma.user.findUnique({
-        where: { username: clerkUsername },
+      const existingUsername = await prisma.user.findUnique({
+        where: { username },
       });
-      if (existingPhone) {
+      if (existingUsername) {
         result.failed.push({
           row: i + 2,
-          reason: `Nomor telepon "${phoneNumber}" sudah terdaftar`,
+          reason: `Username "${username}" sudah terdaftar`,
         });
         continue;
       }
@@ -130,7 +132,7 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
       }
 
       const clerkUser = await client.users.createUser({
-        username: clerkUsername,
+        username,
         firstName: fullname,
         password: customerId,
       });
@@ -138,10 +140,15 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
 
       await prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
-          data: { fullname, username: clerkUsername, role: "CUSTOMER" },
+          data: { fullname, username, role: "CUSTOMER" },
         });
         await tx.customer.create({
-          data: { userId: user.id, customerId, phoneNumber, address },
+          data: {
+            userId: user.id,
+            customerId,
+            phoneNumber: phoneNumber || null,
+            address,
+          },
         });
       });
 

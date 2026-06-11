@@ -29,6 +29,7 @@ export default function CreateCustomerDialog() {
     resolver: zodResolver(CreateCustomerSchema),
     defaultValues: {
       fullname: "",
+      username: "",
       customerId: "",
       phoneNumber: "",
       address: "",
@@ -61,8 +62,7 @@ export default function CreateCustomerDialog() {
         <DialogHeader>
           <DialogTitle>Tambah Customer</DialogTitle>
           <p className="text-muted-foreground -mt-1 text-sm">
-            Buat akun pelanggan baru — login menggunakan nomor telepon dan ID
-            pelanggan
+            Buat akun pelanggan baru — login menggunakan username dan ID pelanggan
           </p>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
@@ -76,6 +76,27 @@ export default function CreateCustomerDialog() {
                   <InputGroup>
                     <InputGroupInput {...field} placeholder="Nama lengkap pelanggan" />
                   </InputGroup>
+                  {fieldState.error && (
+                    <p className="text-destructive mt-1 text-xs">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="username"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>Username</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput {...field} placeholder="username pelanggan" />
+                  </InputGroup>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Digunakan sebagai username login
+                  </p>
                   {fieldState.error && (
                     <p className="text-destructive mt-1 text-xs">
                       {fieldState.error.message}
@@ -114,13 +135,13 @@ export default function CreateCustomerDialog() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field>
-                  <FieldLabel>Nomor Telepon</FieldLabel>
+                  <FieldLabel>
+                    Nomor Telepon{" "}
+                    <span className="text-muted-foreground font-normal">(opsional)</span>
+                  </FieldLabel>
                   <InputGroup>
                     <InputGroupInput {...field} placeholder="08xxxxxxxxxx" />
                   </InputGroup>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Digunakan sebagai username login
-                  </p>
                   {fieldState.error && (
                     <p className="text-destructive mt-1 text-xs">
                       {fieldState.error.message}
