@@ -1,7 +1,6 @@
 import PageHeader from "@/components/root/PageHeader";
 import { UserService } from "@/servers/services/user.service";
 import DynamicBreadcrumb from "@/components/root/DynamicBreadcrumb";
-import CreateUserDialog from "@/components/root/user/CreateUserDialog";
 import UserStats from "@/components/root/user/UserStats";
 import UserTable from "@/components/root/user/UserTable";
 
@@ -15,7 +14,7 @@ export default async function UserPage() {
           <DynamicBreadcrumb />
           <PageHeader title="User List" subtitle="Manage all users" />
         </div>
-        <CreateUserDialog />
+        {/* <CreateUserDialog /> */}
       </div>
 
       <UserStats users={users} />

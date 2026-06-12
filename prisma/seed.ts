@@ -8,84 +8,88 @@ const hoursFromNow = (n: number) => new Date(Date.now() + n * 36e5);
 async function main() {
   console.log("Resetting database...");
 
-  // Delete in FK-safe order
   await prisma.image.deleteMany();
   await prisma.complaint.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.technician.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log("Seeding users...");
+  console.log("Seeding admin...");
 
-  // ── Staff ──────────────────────────────────────────────────────────────────
-  await prisma.user.createMany({
-    data: [
-      { fullname: "Admin PDAM", username: "admin", role: UserRole.ADMIN },
-      { fullname: "Kepala Teknik", username: "lead", role: UserRole.LEAD },
-    ],
-  });
-
-  // ── Customers ─────────────────────────────────────────────────────────────
-  const customerUsers = await prisma.user.createManyAndReturn({
-    data: [
-      {
-        fullname: "Budi Santoso",
-        username: "budisantoso",
-        role: UserRole.CUSTOMER,
-      },
-      {
-        fullname: "Siti Rahayu",
-        username: "sitirahayu",
-        role: UserRole.CUSTOMER,
-      },
-      {
-        fullname: "Ahmad Fauzi",
-        username: "ahmadfauzi",
-        role: UserRole.CUSTOMER,
-      },
-      {
-        fullname: "Dewi Lestari",
-        username: "dewilestari",
-        role: UserRole.CUSTOMER,
-      },
-      {
-        fullname: "Rudi Hartono",
-        username: "rudihartono",
-        role: UserRole.CUSTOMER,
-      },
-    ],
+  await prisma.user.create({
+    data: { fullname: "Admin PDAM", username: "admin", role: UserRole.ADMIN },
   });
 
   console.log("Seeding technicians...");
 
-  // ── Technicians ───────────────────────────────────────────────────────────
+  // Create User records first, then Technician records linked to them
   const [tech1, tech2] = await Promise.all([
-    prisma.technician.create({
-      data: {
-        fullname: "Joko Widodo",
-        phoneNumber: "081211112222",
-        region: "Jakarta Utara",
-      },
-    }),
-    prisma.technician.create({
-      data: {
-        fullname: "Bambang Susilo",
-        phoneNumber: "081233334444",
-        region: "Jakarta Selatan",
-      },
-    }),
+    prisma.user
+      .create({
+        data: {
+          fullname: "Joko Widodo",
+          username: "joko.widodo",
+          role: UserRole.TECHNICIAN,
+        },
+      })
+      .then((u) =>
+        prisma.technician.create({
+          data: {
+            fullname: u.fullname,
+            phoneNumber: "081211112222",
+            region: "Jakarta Utara",
+            userId: u.id,
+          },
+        }),
+      ),
+    prisma.user
+      .create({
+        data: {
+          fullname: "Bambang Susilo",
+          username: "bambang.susilo",
+          role: UserRole.TECHNICIAN,
+        },
+      })
+      .then((u) =>
+        prisma.technician.create({
+          data: {
+            fullname: u.fullname,
+            phoneNumber: "081233334444",
+            region: "Jakarta Selatan",
+            userId: u.id,
+          },
+        }),
+      ),
   ]);
 
   console.log("Seeding customers & complaints...");
 
-  // ── Customer profiles + complaints ────────────────────────────────────────
-  // Each customer: 1 active complaint (PENDING or IN_PROGRESS) + resolved/cancelled history
+  // username = login username, customerId = password
+  const customerUsers = await prisma.user.createManyAndReturn({
+    data: [
+      {
+        fullname: "Budi Santoso",
+        username: "budi.santoso",
+        role: UserRole.CUSTOMER,
+      },
+      {
+        fullname: "Siti Rahayu",
+        username: "siti.rahayu",
+        role: UserRole.CUSTOMER,
+      },
+      {
+        fullname: "Ahmad Fauzi",
+        username: "ahmad.fauzi",
+        role: UserRole.CUSTOMER,
+      },
+    ],
+  });
 
   // Customer 1 — Budi Santoso — active: PENDING
   const c1 = await prisma.customer.create({
     data: {
       userId: customerUsers[0].id,
-      customerId: "PDAM-001",
+      customerId: "PDAM00001",
       phoneNumber: "081311112222",
       address: "Jl. Mangga No. 12, Jakarta Utara",
     },
@@ -101,7 +105,6 @@ async function main() {
         status: ComplaintStatus.PENDING,
         createdAt: hoursAgo(2),
       },
-      // History
       {
         customerId: c1.id,
         technicianId: tech1.id,
@@ -125,7 +128,7 @@ async function main() {
   const c2 = await prisma.customer.create({
     data: {
       userId: customerUsers[1].id,
-      customerId: "PDAM-002",
+      customerId: "PDAM00002",
       phoneNumber: "081322223333",
       address: "Jl. Kenanga No. 5, Jakarta Selatan",
     },
@@ -143,7 +146,6 @@ async function main() {
         scheduledAt: hoursFromNow(3),
         createdAt: hoursAgo(5),
       },
-      // History
       {
         customerId: c2.id,
         technicianId: tech1.id,
@@ -169,7 +171,7 @@ async function main() {
   const c3 = await prisma.customer.create({
     data: {
       userId: customerUsers[2].id,
-      customerId: "PDAM-003",
+      customerId: "PDAM00003",
       phoneNumber: "081333334444",
       address: "Jl. Melati Blok C No. 8, Depok",
     },
@@ -184,7 +186,6 @@ async function main() {
         status: ComplaintStatus.PENDING,
         createdAt: hoursAgo(1),
       },
-      // History
       {
         customerId: c3.id,
         technicianId: tech1.id,
@@ -197,86 +198,23 @@ async function main() {
     ],
   });
 
-  // Customer 4 — Dewi Lestari — active: IN_PROGRESS
-  const c4 = await prisma.customer.create({
-    data: {
-      userId: customerUsers[3].id,
-      customerId: "PDAM-004",
-      phoneNumber: "081344445555",
-      address: "Jl. Bougenville No. 21, Bekasi",
-    },
-  });
-  await prisma.complaint.createMany({
-    data: [
-      {
-        customerId: c4.id,
-        technicianId: tech1.id,
-        title: "Gangguan lainnya pada instalasi",
-        description: "Ada suara aneh dari pipa dalam dinding.",
-        disturbanceType: DisturbanceType.LAINNYA,
-        status: ComplaintStatus.IN_PROGRESS,
-        scheduledAt: hoursFromNow(1),
-        createdAt: hoursAgo(8),
-      },
-      // History
-      {
-        customerId: c4.id,
-        technicianId: tech2.id,
-        title: "Air keruh setelah hujan lebat",
-        disturbanceType: DisturbanceType.AIR_KERUH,
-        status: ComplaintStatus.RESOLVED,
-        scheduledAt: daysAgo(5),
-        createdAt: daysAgo(7),
-      },
-      {
-        customerId: c4.id,
-        title: "Tekanan rendah pagi hari",
-        disturbanceType: DisturbanceType.TEKANAN_RENDAH,
-        status: ComplaintStatus.CANCELLED,
-        createdAt: daysAgo(20),
-      },
-    ],
-  });
-
-  // Customer 5 — Rudi Hartono — active: PENDING
-  const c5 = await prisma.customer.create({
-    data: {
-      userId: customerUsers[4].id,
-      customerId: "PDAM-005",
-      phoneNumber: "081355556666",
-      address: "Perumahan Griya Asri No. 3, Tangerang",
-    },
-  });
-  await prisma.complaint.createMany({
-    data: [
-      {
-        customerId: c5.id,
-        title: "Meter rusak, angka tidak berubah",
-        description: "Sudah digunakan air banyak tapi meteran tidak bergerak.",
-        disturbanceType: DisturbanceType.METER_RUSAK,
-        status: ComplaintStatus.PENDING,
-        createdAt: hoursAgo(4),
-      },
-      // History
-      {
-        customerId: c5.id,
-        technicianId: tech2.id,
-        title: "Kebocoran kecil di bawah wastafel",
-        disturbanceType: DisturbanceType.KEBOCORAN_PIPA,
-        status: ComplaintStatus.RESOLVED,
-        scheduledAt: daysAgo(18),
-        createdAt: daysAgo(19),
-      },
-    ],
-  });
-
   const totalComplaints = await prisma.complaint.count();
   const totalCustomers = await prisma.customer.count();
   const totalUsers = await prisma.user.count();
+  const totalTechnicians = await prisma.technician.count();
 
   console.log(
-    `Seeding finished. ${totalUsers} users · ${totalCustomers} customers · ${totalComplaints} complaints`,
+    `Seeding finished. ${totalUsers} users · ${totalCustomers} customers · ${totalTechnicians} technicians · ${totalComplaints} complaints`,
   );
+  console.log("\nSeed credentials (username / password):");
+  console.log("  admin          / (set in Clerk)");
+  console.log("  joko.widodo    / (set in Clerk)");
+  console.log("  bambang.susilo / (set in Clerk)");
+  console.log("  budi.santoso   / PDAM00001");
+  console.log("  siti.rahayu    / PDAM00002");
+  console.log("  ahmad.fauzi    / PDAM00003");
+  console.log("  dewi.lestari   / PDAM00004");
+  console.log("  rudi.hartono   / PDAM00005");
 }
 
 main()
