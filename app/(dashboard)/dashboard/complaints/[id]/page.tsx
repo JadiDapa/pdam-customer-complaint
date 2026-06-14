@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FileDown } from "lucide-react";
 import { ComplaintService } from "@/servers/services/complaint.service";
 import { TechnicianService } from "@/servers/services/technician.service";
 import DynamicBreadcrumb from "@/components/root/DynamicBreadcrumb";
 import PageHeader from "@/components/root/PageHeader";
 import ComplaintDetail from "@/components/root/complaints/detail/ComplaintDetail";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -27,6 +30,15 @@ export default async function ComplaintDetailPage({ params }: PageProps) {
             subtitle={`Complaint #${complaint.id} · ${complaint.customer?.customerId ?? "No Customer"}`}
           />
         </div>
+
+        {complaint.status === "RESOLVED" && (
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href={`/print/complaints/${complaint.id}`} target="_blank">
+              <FileDown size={16} />
+              Export PDF
+            </Link>
+          </Button>
+        )}
       </div>
 
       <ComplaintDetail complaint={complaint} technicians={technicians} />

@@ -41,12 +41,8 @@ export default function SignInForm() {
       if (!loaded) return;
 
       try {
-        const identifier = /^\d+$/.test(values.username)
-          ? `p${values.username}`
-          : values.username;
-
         const { error } = await signIn.password({
-          identifier,
+          identifier: values.username,
           password: values.password,
         });
 

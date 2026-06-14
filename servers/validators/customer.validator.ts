@@ -30,5 +30,22 @@ export const UpdateCustomerSchema = z.object({
   address: z.string().min(1).optional(),
 });
 
+export const SignUpCustomerSchema = z
+  .object({
+    fullname: z.string().min(1, "Nama lengkap tidak boleh kosong"),
+    customerId: z.string().min(8, "ID Pelanggan minimal 8 karakter"),
+    phoneNumber: z.string().optional(),
+    address: z.string().min(1, "Alamat tidak boleh kosong"),
+    username: z.string().min(4, "Username minimal 4 karakter"),
+    password: z.string().min(8, "Password minimal 8 karakter"),
+    confirmPassword: z.string().min(1, "Konfirmasi password tidak boleh kosong"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Konfirmasi password tidak cocok",
+    path: ["confirmPassword"],
+  });
+
+export type SignUpCustomerDTO = z.infer<typeof SignUpCustomerSchema>;
+
 export type CreateCustomerDTO = z.infer<typeof CreateCustomerSchema>;
 export type UpdateCustomerDTO = z.infer<typeof UpdateCustomerSchema>;

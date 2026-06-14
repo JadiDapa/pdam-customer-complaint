@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   CreateCustomerSchema,
+  SignUpCustomerSchema,
   UpdateCustomerSchema,
 } from "@/servers/validators/customer.validator";
 import { CustomerService } from "@/servers/services/customer.service";
@@ -34,6 +35,56 @@ export async function createCustomer(
       username,
       firstName: fullname,
       password: customerId,
+    });
+    clerkUserId = clerkUser.id;
+
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { fullname, username, role: "CUSTOMER" },
+      });
+      await tx.customer.create({
+        data: {
+          userId: user.id,
+          customerId,
+          phoneNumber: phoneNumber || null,
+          address,
+        },
+      });
+    });
+  } catch (e) {
+    if (clerkUserId) {
+      await client.users.deleteUser(clerkUserId).catch(() => {});
+    }
+    throw e;
+  }
+
+  revalidatePath("/dashboard/customers");
+}
+
+export async function signUpCustomer(
+  input: z.input<typeof SignUpCustomerSchema>,
+) {
+  const { fullname, username, customerId, phoneNumber, address, password } =
+    SignUpCustomerSchema.parse(input);
+
+  const client = await clerkClient();
+  let clerkUserId: string | null = null;
+
+  try {
+    const existingUsername = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (existingUsername) throw new Error("Username sudah terdaftar");
+
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { customerId },
+    });
+    if (existingCustomer) throw new Error("ID Pelanggan sudah terdaftar");
+
+    const clerkUser = await client.users.createUser({
+      username,
+      firstName: fullname,
+      password,
     });
     clerkUserId = clerkUser.id;
 
