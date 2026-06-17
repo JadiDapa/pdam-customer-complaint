@@ -301,12 +301,8 @@ export default function ComplaintReport({ complaint }: ComplaintReportProps) {
             />
           )}
 
-          {/* ── Signatures ─────────────────────────────────────── */}
-          <section className="mt-10 grid grid-cols-2 gap-12 break-inside-avoid">
-            <SignatureBlock
-              role="Customer"
-              name={complaint.customer?.user.fullname ?? ""}
-            />
+          {/* ── Signature ──────────────────────────────────────── */}
+          <section className="mt-10 flex justify-end break-inside-avoid">
             <SignatureBlock
               role="Field Officer"
               name={complaint.technician?.fullname ?? ""}
@@ -487,7 +483,7 @@ function PhotoSection({
 
 function SignatureBlock({ role, name }: { role: string; name: string }) {
   return (
-    <div className="text-center">
+    <div className="w-64 text-center">
       <p className="text-[10px] text-neutral-500">{role}</p>
       <div className="mt-12 border-t border-neutral-400" />
       <p className="mt-1.5 text-[11px] font-semibold text-neutral-800">
