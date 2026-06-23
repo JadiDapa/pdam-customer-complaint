@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ImageIcon, Upload, X } from "lucide-react";
 import { submitEvidence } from "@/app/actions/complaint.actions";
+import { compressImages } from "@/lib/compress-image";
 import { toast } from "sonner";
 
 interface EvidenceActionPanelProps {
@@ -47,8 +48,11 @@ export default function EvidenceActionPanel({
     setError(null);
 
     try {
+      // Shrink images in the browser so the request body stays under
+      // Vercel's 4.5 MB function limit (FUNCTION_PAYLOAD_TOO_LARGE).
+      const compressed = await compressImages(previews.map((p) => p.file));
       const formData = new FormData();
-      previews.forEach((p) => formData.append("files", p.file));
+      compressed.forEach((file) => formData.append("files", file));
       await submitEvidence(complaintId, formData);
       toast.success("Bukti berhasil diunggah! Keluhan ditandai Resolved.");
       router.refresh();

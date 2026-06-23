@@ -28,6 +28,7 @@ type CustomerWithUser = Prisma.CustomerGetPayload<{ include: { user: true } }>;
 import { useRouter } from "next/navigation";
 import { X, ImagePlus, UploadCloud } from "lucide-react";
 import { createComplaint } from "@/app/actions/complaint.actions";
+import { compressImages } from "@/lib/compress-image";
 
 const disturbanceLabels: Record<DisturbanceType, string> = {
   KEBOCORAN_PIPA: "Kebocoran Pipa",
@@ -130,7 +131,10 @@ export default function CreateComplaintForm({
         if (values.description)
           formData.append("description", values.description);
 
-        images.forEach((img) => formData.append("images", img.file));
+        // Shrink images in the browser so the request body stays under
+        // Vercel's 4.5 MB function limit (FUNCTION_PAYLOAD_TOO_LARGE).
+        const compressed = await compressImages(images.map((img) => img.file));
+        compressed.forEach((file) => formData.append("images", file));
 
         const result = await createComplaint(formData);
         if (result.error) {
