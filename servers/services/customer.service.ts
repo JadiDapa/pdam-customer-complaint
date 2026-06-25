@@ -7,7 +7,6 @@ export type CustomerListOptions = {
   pageSize?: number;
   userId?: number;
   customerId?: string;
-  phoneNumber?: string;
   address?: string;
   orderBy?: Prisma.CustomerOrderByWithRelationInput;
 };
@@ -17,7 +16,6 @@ function customerWhere(opts: CustomerListOptions): Prisma.CustomerWhereInput {
 
   if (opts.userId) and.push({ userId: opts.userId });
   if (opts.customerId) and.push({ customerId: opts.customerId });
-  if (opts.phoneNumber) and.push({ phoneNumber: opts.phoneNumber });
   if (opts.address) and.push({ address: opts.address });
 
   return and.length ? { AND: and } : {};

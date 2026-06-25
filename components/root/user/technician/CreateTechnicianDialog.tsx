@@ -38,7 +38,6 @@ export default function CreateTechnicianDialog() {
       fullname: "",
       username: "",
       password: "",
-      phoneNumber: "",
       region: "",
     },
   });
@@ -133,24 +132,6 @@ export default function CreateTechnicianDialog() {
                         )}
                       </InputGroupButton>
                     </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.error && (
-                    <p className="text-destructive mt-1 text-xs">
-                      {fieldState.error.message}
-                    </p>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="phoneNumber"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>Nomor Telepon</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} placeholder="08xxxxxxxxxx" />
                   </InputGroup>
                   {fieldState.error && (
                     <p className="text-destructive mt-1 text-xs">

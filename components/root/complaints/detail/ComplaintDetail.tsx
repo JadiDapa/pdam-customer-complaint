@@ -11,7 +11,6 @@ import {
   Gauge,
   Hash,
   MapPin,
-  Phone,
   HelpCircle,
   Wrench,
   User,
@@ -37,7 +36,6 @@ type ComplaintDetailType = {
   customer: {
     id: number;
     customerId: string;
-    phoneNumber: string;
     address: string;
     user: {
       fullname: string;
@@ -47,7 +45,6 @@ type ComplaintDetailType = {
     id: number;
     fullname: string;
     region: string | null;
-    phoneNumber: string;
   } | null;
   images: {
     id: number;
@@ -253,11 +250,7 @@ export default function ComplaintDetail({
                       {complaint.customer.customerId}
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                    <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-                      <Phone size={13} />
-                      {complaint.customer.phoneNumber}
-                    </div>
+                  <div className="grid grid-cols-1 gap-1.5">
                     <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                       <MapPin size={13} />
                       <span className="line-clamp-1">

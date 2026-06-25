@@ -14,7 +14,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 export async function createCustomer(
   input: z.input<typeof CreateCustomerSchema>,
 ) {
-  const { fullname, username, customerId, phoneNumber, address } =
+  const { fullname, username, customerId, address } =
     CreateCustomerSchema.parse(input);
 
   const client = await clerkClient();
@@ -46,7 +46,6 @@ export async function createCustomer(
         data: {
           userId: user.id,
           customerId,
-          phoneNumber: phoneNumber || null,
           address,
         },
       });
@@ -64,7 +63,7 @@ export async function createCustomer(
 export async function signUpCustomer(
   input: z.input<typeof SignUpCustomerSchema>,
 ) {
-  const { fullname, username, customerId, phoneNumber, address, password } =
+  const { fullname, username, customerId, address, password } =
     SignUpCustomerSchema.parse(input);
 
   const client = await clerkClient();
@@ -96,7 +95,6 @@ export async function signUpCustomer(
         data: {
           userId: user.id,
           customerId,
-          phoneNumber: phoneNumber || null,
           address,
         },
       });
@@ -129,7 +127,6 @@ export type ImportRow = {
   fullname: string;
   username: string;
   customerId: string;
-  phoneNumber?: string;
   address: string;
 };
 
@@ -146,7 +143,7 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
     const row = rows[i];
     let clerkUserId: string | null = null;
     try {
-      const { fullname, username, customerId, phoneNumber, address } = row;
+      const { fullname, username, customerId, address } = row;
       if (!fullname || !username || !customerId || !address) {
         result.failed.push({ row: i + 2, reason: "Missing required fields" });
         continue;
@@ -197,7 +194,6 @@ export async function importCustomers(rows: ImportRow[]): Promise<ImportResult> 
           data: {
             userId: user.id,
             customerId,
-            phoneNumber: phoneNumber || null,
             address,
           },
         });

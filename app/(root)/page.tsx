@@ -85,7 +85,6 @@ async function CustomerHomePage({
   const profileDetails = customer
     ? [
         { label: "No. Pelanggan", value: customer.customerId },
-        { label: "No. Telepon", value: customer.phoneNumber },
         { label: "Alamat", value: customer.address },
       ]
     : [];
@@ -260,7 +259,6 @@ async function TechnicianHomePage({
 
   const profileDetails = technician
     ? [
-        { label: "No. Telepon", value: technician.phoneNumber },
         { label: "Wilayah", value: technician.region },
       ]
     : [];

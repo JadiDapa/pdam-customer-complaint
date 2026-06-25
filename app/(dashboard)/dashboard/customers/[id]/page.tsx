@@ -6,7 +6,7 @@ import DynamicBreadcrumb from "@/components/root/DynamicBreadcrumb";
 import PageHeader from "@/components/root/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Hash, Calendar, User } from "lucide-react";
+import { MapPin, Hash, Calendar, User } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -63,7 +63,6 @@ export default async function CustomerDetailPage({ params }: PageProps) {
 
               <div className="border-border/40 divide-border/40 divide-y rounded-lg border text-sm">
                 <InfoRow icon={<Hash size={14} />} label="Customer ID" value={customer.customerId} />
-                <InfoRow icon={<Phone size={14} />} label="Telepon" value={customer.phoneNumber} />
                 <InfoRow icon={<MapPin size={14} />} label="Alamat" value={customer.address} />
                 <InfoRow icon={<User size={14} />} label="Role" value={customer.user.role} />
                 <InfoRow

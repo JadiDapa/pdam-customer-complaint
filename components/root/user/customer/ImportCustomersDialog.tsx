@@ -65,7 +65,6 @@ export default function ImportCustomersDialog() {
           fullname: String(r["fullname"] ?? "").trim(),
           username: String(r["username"] ?? "").trim(),
           customerId: String(r["customerId"] ?? "").trim(),
-          phoneNumber: String(r["phoneNumber"] ?? "").trim() || undefined,
           address: String(r["address"] ?? "").trim(),
         }));
 
@@ -141,10 +140,6 @@ export default function ImportCustomersDialog() {
               <span className="text-foreground font-mono">
                 {REQUIRED_COLS.join(", ")}
               </span>
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Kolom opsional:{" "}
-              <span className="text-foreground font-mono">phoneNumber</span>
             </p>
             <p className="text-muted-foreground text-xs">
               Login pelanggan:{" "}

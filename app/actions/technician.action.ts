@@ -37,7 +37,6 @@ export async function createTechnician(
 
     await TechnicianService.create({
       fullname: data.fullname,
-      phoneNumber: data.phoneNumber,
       region: data.region,
       userId: user.id,
     });

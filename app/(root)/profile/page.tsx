@@ -1,7 +1,7 @@
 import { CustomerService } from "@/servers/services/customer.service";
 import { TechnicianService } from "@/servers/services/technician.service";
 import { getCurrentUser } from "@/app/actions/user.actions";
-import { Hash, Phone, MapPin, Calendar, User, ShieldCheck } from "lucide-react";
+import { Hash, MapPin, Calendar, User, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 
 export default async function ProfilePage() {
@@ -84,11 +84,6 @@ export default async function ProfilePage() {
                   value={customer.customerId}
                 />
                 <InfoRow
-                  icon={<Phone size={14} />}
-                  label="Telepon"
-                  value={customer.phoneNumber}
-                />
-                <InfoRow
                   icon={<MapPin size={14} />}
                   label="Alamat"
                   value={customer.address}
@@ -115,11 +110,6 @@ export default async function ProfilePage() {
             <SectionLabel>Data teknisi</SectionLabel>
             {technician ? (
               <dl className="divide-border/50 mt-3 divide-y">
-                <InfoRow
-                  icon={<Phone size={14} />}
-                  label="No. Telepon"
-                  value={technician.phoneNumber}
-                />
                 <InfoRow
                   icon={<MapPin size={14} />}
                   label="Wilayah"

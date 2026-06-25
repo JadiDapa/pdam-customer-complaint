@@ -36,7 +36,6 @@ async function main() {
         prisma.technician.create({
           data: {
             fullname: u.fullname,
-            phoneNumber: "081211112222",
             region: "Jakarta Utara",
             userId: u.id,
           },
@@ -54,7 +53,6 @@ async function main() {
         prisma.technician.create({
           data: {
             fullname: u.fullname,
-            phoneNumber: "081233334444",
             region: "Jakarta Selatan",
             userId: u.id,
           },
@@ -90,7 +88,6 @@ async function main() {
     data: {
       userId: customerUsers[0].id,
       customerId: "PDAM00001",
-      phoneNumber: "081311112222",
       address: "Jl. Mangga No. 12, Jakarta Utara",
     },
   });
@@ -129,7 +126,6 @@ async function main() {
     data: {
       userId: customerUsers[1].id,
       customerId: "PDAM00002",
-      phoneNumber: "081322223333",
       address: "Jl. Kenanga No. 5, Jakarta Selatan",
     },
   });
@@ -172,7 +168,6 @@ async function main() {
     data: {
       userId: customerUsers[2].id,
       customerId: "PDAM00003",
-      phoneNumber: "081333334444",
       address: "Jl. Melati Blok C No. 8, Depok",
     },
   });

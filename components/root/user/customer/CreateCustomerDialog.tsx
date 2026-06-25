@@ -31,7 +31,6 @@ export default function CreateCustomerDialog() {
       fullname: "",
       username: "",
       customerId: "",
-      phoneNumber: "",
       address: "",
     },
   });
@@ -121,27 +120,6 @@ export default function CreateCustomerDialog() {
                   <p className="text-muted-foreground mt-1 text-xs">
                     Digunakan sebagai password login
                   </p>
-                  {fieldState.error && (
-                    <p className="text-destructive mt-1 text-xs">
-                      {fieldState.error.message}
-                    </p>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="phoneNumber"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>
-                    Nomor Telepon{" "}
-                    <span className="text-muted-foreground font-normal">(opsional)</span>
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} placeholder="08xxxxxxxxxx" />
-                  </InputGroup>
                   {fieldState.error && (
                     <p className="text-destructive mt-1 text-xs">
                       {fieldState.error.message}

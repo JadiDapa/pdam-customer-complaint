@@ -20,13 +20,11 @@ export const CreateCustomerSchema = z.object({
   fullname: z.string().min(1),
   username: z.string().min(1),
   customerId: z.string().min(1),
-  phoneNumber: z.string().optional(),
   address: z.string().min(1),
 });
 
 export const UpdateCustomerSchema = z.object({
   customerId: z.string().min(1).optional(),
-  phoneNumber: z.string().min(1).optional(),
   address: z.string().min(1).optional(),
 });
 
@@ -34,7 +32,6 @@ export const SignUpCustomerSchema = z
   .object({
     fullname: z.string().min(1, "Nama lengkap tidak boleh kosong"),
     customerId: z.string().min(8, "ID Pelanggan minimal 8 karakter"),
-    phoneNumber: z.string().optional(),
     address: z.string().min(1, "Alamat tidak boleh kosong"),
     username: z.string().min(4, "Username minimal 4 karakter"),
     password: z.string().min(8, "Password minimal 8 karakter"),

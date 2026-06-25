@@ -15,14 +15,12 @@ type ReportComplaint = {
   updatedAt: Date;
   customer: {
     customerId: string;
-    phoneNumber: string | null;
     address: string;
     user: { fullname: string };
   } | null;
   technician: {
     fullname: string;
     region: string | null;
-    phoneNumber: string;
   } | null;
   images: {
     id: number;
@@ -245,10 +243,6 @@ export default function ComplaintReport({ complaint }: ComplaintReportProps) {
                 label="Service Region"
                 value={complaint.technician?.region ?? "—"}
               />
-              <Field
-                label="Technician Contact"
-                value={complaint.technician?.phoneNumber ?? "—"}
-              />
             </Section>
           </div>
 
@@ -263,10 +257,6 @@ export default function ComplaintReport({ complaint }: ComplaintReportProps) {
                 label="Customer ID"
                 value={complaint.customer?.customerId ?? "—"}
                 mono
-              />
-              <Field
-                label="Phone Number"
-                value={complaint.customer?.phoneNumber ?? "—"}
               />
               <Field
                 label="Service Address"

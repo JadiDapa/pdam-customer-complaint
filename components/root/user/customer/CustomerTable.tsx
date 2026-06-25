@@ -18,9 +18,8 @@ export default function CustomerTable({ customers }: CustomerTableProps) {
     <DataTable
       columns={customerColumn}
       data={customers}
-      initialColumnVisibility={{ phoneNumber: false }}
       filters={(table) => (
-        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-3 lg:gap-6">
+        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-2 lg:gap-6">
           <SearchDataTable
             table={table}
             column="customer"
@@ -30,11 +29,6 @@ export default function CustomerTable({ customers }: CustomerTableProps) {
             table={table}
             column="address"
             placeholder="Search Address..."
-          />
-          <SearchDataTable
-            table={table}
-            column="phoneNumber"
-            placeholder="Search Phone Number..."
           />
         </div>
       )}
@@ -76,18 +70,12 @@ export const customerColumn: ColumnDef<CustomerType>[] = [
               {name}
             </Link>
             <span className="text-muted-foreground text-xs">
-              {row.original.phoneNumber}
+              @{row.original.user.username}
             </span>
           </div>
         </div>
       );
     },
-  },
-
-  {
-    accessorKey: "phoneNumber",
-    header: () => null,
-    cell: () => null,
   },
 
   {

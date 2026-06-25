@@ -17,7 +17,7 @@ export default function UserTable({ users }: UserTableProps) {
       columns={userColumn}
       data={users}
       filters={(table) => (
-        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-3 lg:gap-6">
+        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-2 lg:gap-6">
           <SearchDataTable
             table={table}
             column="user"
@@ -27,11 +27,6 @@ export default function UserTable({ users }: UserTableProps) {
             table={table}
             column="address"
             placeholder="Search Address..."
-          />
-          <SearchDataTable
-            table={table}
-            column="phoneNumber"
-            placeholder="Search Phone Number..."
           />
         </div>
       )}

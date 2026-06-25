@@ -9,7 +9,6 @@ export type TechnicianListOptions = {
   page?: number;
   pageSize?: number;
   fullname?: string;
-  phoneNumber?: string;
   region?: string;
   orderBy?: Prisma.TechnicianOrderByWithRelationInput;
 };
@@ -20,7 +19,6 @@ function technicianWhere(
   const and: Prisma.TechnicianWhereInput[] = [];
 
   if (opts.fullname) and.push({ fullname: opts.fullname });
-  if (opts.phoneNumber) and.push({ phoneNumber: opts.phoneNumber });
   if (opts.region) and.push({ region: opts.region });
 
   return and.length ? { AND: and } : {};

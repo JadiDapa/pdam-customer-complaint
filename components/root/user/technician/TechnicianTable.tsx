@@ -19,7 +19,7 @@ export default function TechnicianTable({ technicians }: TechnicianTableProps) {
       columns={technicianColumn}
       data={technicians}
       filters={(table) => (
-        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-3 lg:gap-6">
+        <div className="grid w-full items-end gap-4 p-4 lg:grid-cols-2 lg:gap-6">
           <SearchDataTable
             table={table}
             column="technician"
@@ -29,11 +29,6 @@ export default function TechnicianTable({ technicians }: TechnicianTableProps) {
             table={table}
             column="address"
             placeholder="Search Address..."
-          />
-          <SearchDataTable
-            table={table}
-            column="phoneNumber"
-            placeholder="Search Phone Number..."
           />
         </div>
       )}
@@ -77,7 +72,7 @@ export const technicianColumn: ColumnDef<TechnicianType>[] = [
               {name}
             </Link>
             <span className="text-muted-foreground text-xs">
-              {row.original.phoneNumber}
+              {row.original.region ?? "–"}
             </span>
           </div>
         </div>

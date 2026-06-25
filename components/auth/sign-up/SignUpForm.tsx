@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useClerk, useSignIn } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { AtSign, Eye, EyeOff, IdCard, MapPin, Phone, User } from "lucide-react";
+import { AtSign, Eye, EyeOff, IdCard, MapPin, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -37,7 +37,6 @@ export default function SignUpForm() {
     defaultValues: {
       fullname: "",
       customerId: "",
-      phoneNumber: "",
       address: "",
       username: "",
       password: "",
@@ -101,49 +100,26 @@ export default function SignUpForm() {
           )}
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Controller
-            control={form.control}
-            name="customerId"
-            render={({ field, fieldState }) => (
-              <div className="space-y-1">
-                <InputGroup className={inputClass}>
-                  <InputGroupInput
-                    {...field}
-                    placeholder="ID Pelanggan"
-                    autoComplete="off"
-                    aria-invalid={!!fieldState.error}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <IdCard size={17} />
-                  </InputGroupAddon>
-                </InputGroup>
-                <FieldError errors={[fieldState.error]} />
-              </div>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="phoneNumber"
-            render={({ field, fieldState }) => (
-              <div className="space-y-1">
-                <InputGroup className={inputClass}>
-                  <InputGroupInput
-                    {...field}
-                    placeholder="No. Telepon"
-                    autoComplete="off"
-                    aria-invalid={!!fieldState.error}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <Phone size={17} />
-                  </InputGroupAddon>
-                </InputGroup>
-                <FieldError errors={[fieldState.error]} />
-              </div>
-            )}
-          />
-        </div>
+        <Controller
+          control={form.control}
+          name="customerId"
+          render={({ field, fieldState }) => (
+            <div className="space-y-1">
+              <InputGroup className={inputClass}>
+                <InputGroupInput
+                  {...field}
+                  placeholder="ID Pelanggan"
+                  autoComplete="off"
+                  aria-invalid={!!fieldState.error}
+                />
+                <InputGroupAddon align="inline-end">
+                  <IdCard size={17} />
+                </InputGroupAddon>
+              </InputGroup>
+              <FieldError errors={[fieldState.error]} />
+            </div>
+          )}
+        />
 
         <Controller
           control={form.control}
