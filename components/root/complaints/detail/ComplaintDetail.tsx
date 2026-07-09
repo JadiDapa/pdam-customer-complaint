@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ComplaintStatus, DisturbanceType } from "@/generated/prisma";
+import { ComplaintStatus, DisturbanceType, UserRole } from "@/generated/prisma";
 import {
   Calendar,
   Droplet,
@@ -14,11 +14,13 @@ import {
   HelpCircle,
   Wrench,
   User,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ScheduleActionPanel from "./ScheduleActionPanel";
+import AssignTechnicianPanel from "./AssignTechnicianPanel";
 import EvidenceActionPanel from "./EvidenceActionPanel";
 import DeleteConfirmDialog from "@/components/root/DeleteConfirmDialog";
 import { deleteComplaint } from "@/app/actions/complaint.actions";
@@ -59,6 +61,7 @@ type Technician = { id: number; fullname: string; region: string | null };
 interface ComplaintDetailProps {
   complaint: ComplaintDetailType;
   technicians: Technician[];
+  role: UserRole;
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -135,8 +138,11 @@ const statusConfig: Record<
 export default function ComplaintDetail({
   complaint,
   technicians,
+  role,
 }: ComplaintDetailProps) {
   const router = useRouter();
+  const isAdmin = role === "ADMIN";
+  const isTechnician = role === "TECHNICIAN";
   const disturbance = disturbanceConfig[complaint.disturbanceType];
   const status = statusConfig[complaint.status];
 
@@ -347,15 +353,43 @@ export default function ComplaintDetail({
           </CardContent>
         </Card>
 
-        {/* Action Panel — conditional by status */}
-        {complaint.status === "PENDING" && (
-          <ScheduleActionPanel
+        {/* Action Panel — conditional by role + status */}
+
+        {/* ADMIN: assign a field officer while pending */}
+        {isAdmin && complaint.status === "PENDING" && (
+          <AssignTechnicianPanel
             complaintId={complaint.id}
             technicians={technicians}
+            currentTechnicianId={complaint.technicianId}
           />
         )}
 
-        {complaint.status === "IN_PROGRESS" && (
+        {/* ADMIN: once assigned & in progress, it's the officer's job */}
+        {isAdmin && complaint.status === "IN_PROGRESS" && (
+          <Card className="border border-blue-500/20 bg-blue-500/5">
+            <CardContent className="px-5 py-5 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
+                <Clock size={22} className="text-blue-600" />
+              </div>
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                Sedang dikerjakan petugas
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {complaint.technician
+                  ? `${complaint.technician.fullname} menangani keluhan ini.`
+                  : "Menunggu petugas mengunggah bukti."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* TECHNICIAN: schedule the assigned complaint */}
+        {isTechnician && complaint.status === "PENDING" && (
+          <ScheduleActionPanel complaintId={complaint.id} />
+        )}
+
+        {/* TECHNICIAN: upload evidence to resolve */}
+        {isTechnician && complaint.status === "IN_PROGRESS" && (
           <EvidenceActionPanel complaintId={complaint.id} />
         )}
 
@@ -376,17 +410,19 @@ export default function ComplaintDetail({
           </Card>
         )}
 
-        {/* Delete — available at any status */}
-        <div className="flex justify-end">
-          <DeleteConfirmDialog
-            onConfirm={async () => {
-              await deleteComplaint(complaint.id);
-              router.push("/dashboard/complaints");
-            }}
-            title="Hapus keluhan ini?"
-            description={`Keluhan "#${complaint.id} — ${complaint.title}" beserta semua foto akan dihapus permanen.`}
-          />
-        </div>
+        {/* Delete — admin only, available at any status */}
+        {isAdmin && (
+          <div className="flex justify-end">
+            <DeleteConfirmDialog
+              onConfirm={async () => {
+                await deleteComplaint(complaint.id);
+                router.push("/dashboard/complaints");
+              }}
+              title="Hapus keluhan ini?"
+              description={`Keluhan "#${complaint.id} — ${complaint.title}" beserta semua foto akan dihapus permanen.`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import ServerPagination from "@/components/root/ServerPagination";
 import ComplaintPageStats from "@/components/root/complaints/ComplaintPageStats";
 import ComplaintStatusDonut from "@/components/root/complaints/ComplaintStatusDonut";
 import { ComplaintStatus, DisturbanceType } from "@/generated/prisma";
+import { getCurrentUser } from "@/app/actions/user.actions";
 
 interface PageProps {
   searchParams: Promise<{
@@ -46,9 +47,20 @@ export default async function ComplaintPage({ searchParams }: PageProps) {
       ? disturbanceTypeParam
       : undefined;
 
-  const technicianId = params.technicianId
-    ? Number(params.technicianId)
-    : undefined;
+  // Field officers (TECHNICIAN) only ever see complaints assigned to them —
+  // this scope overrides any technicianId filter from the query string.
+  const user = await getCurrentUser();
+  const isTechnician = user.role === "TECHNICIAN";
+  let scopedTechnicianId: number | undefined;
+  if (isTechnician) {
+    const tech = await TechnicianService.getByUserId(user.id);
+    // Fall back to a non-existent id so a mislinked account sees nothing.
+    scopedTechnicianId = tech?.id ?? -1;
+  }
+
+  const technicianId =
+    scopedTechnicianId ??
+    (params.technicianId ? Number(params.technicianId) : undefined);
 
   // dateFrom = start of selected day, dateTo = end of selected day (exclusive next day)
   let createdAfter: Date | undefined;
@@ -85,6 +97,7 @@ export default async function ComplaintPage({ searchParams }: PageProps) {
         pageSize: 100,
         createdAfter: today,
         createdBefore: tomorrow,
+        technicianId: scopedTechnicianId,
       }),
       ComplaintService.getStats(),
       TechnicianService.list({ pageSize: 100 }),
@@ -95,7 +108,14 @@ export default async function ComplaintPage({ searchParams }: PageProps) {
       <div className="flex flex-col items-center justify-between lg:flex-row">
         <div className="space-y-2">
           <DynamicBreadcrumb />
-          <PageHeader title="Complaint List" subtitle="Manage all complaints" />
+          <PageHeader
+            title="Complaint List"
+            subtitle={
+              isTechnician
+                ? "Keluhan yang ditugaskan kepada Anda"
+                : "Manage all complaints"
+            }
+          />
         </div>
       </div>
 
@@ -109,23 +129,26 @@ export default async function ComplaintPage({ searchParams }: PageProps) {
           Complaint List
         </h2>
 
-        <div className="">
-          <ComplaintPageStats stats={stats} />
-        </div>
+        {!isTechnician && (
+          <div className="">
+            <ComplaintPageStats stats={stats} />
+          </div>
+        )}
 
         <Suspense>
           <ComplaintSearchBar
             search={search}
             status={status}
             customerName={customerName}
-            technicianId={technicianId}
+            technicianId={isTechnician ? undefined : technicianId}
             disturbanceType={disturbanceType}
             dateFrom={params.dateFrom}
             dateTo={params.dateTo}
-            technicians={technicians.map((t) => ({
-              id: t.id,
-              fullname: t.fullname,
-            }))}
+            technicians={
+              isTechnician
+                ? []
+                : technicians.map((t) => ({ id: t.id, fullname: t.fullname }))
+            }
           />
         </Suspense>
 

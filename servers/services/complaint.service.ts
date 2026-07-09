@@ -205,13 +205,17 @@ export const ComplaintService = {
     return complaint;
   },
 
-  async schedule(
-    id: number,
-    data: { technicianId: number; scheduledAt: Date },
-  ) {
+  async assign(id: number, technicianId: number) {
     return prisma.complaint.update({
       where: { id },
-      data: { ...data, status: "IN_PROGRESS" },
+      data: { technicianId },
+    });
+  },
+
+  async schedule(id: number, data: { scheduledAt: Date }) {
+    return prisma.complaint.update({
+      where: { id },
+      data: { scheduledAt: data.scheduledAt, status: "IN_PROGRESS" },
     });
   },
 

@@ -3,8 +3,35 @@
 import { revalidatePath } from "next/cache";
 import { UpdateComplaintSchema } from "@/servers/validators/complaint.validator";
 import { ComplaintService } from "@/servers/services/complaint.service";
+import { TechnicianService } from "@/servers/services/technician.service";
+import { getCurrentUser } from "@/app/actions/user.actions";
 import z from "zod";
 import { CreateComplaintSchema } from "@/servers/validators/complaint.validator";
+
+/** Throws unless the logged-in user is an ADMIN. */
+async function assertAdmin() {
+  const user = await getCurrentUser();
+  if (user.role !== "ADMIN") {
+    throw new Error("FORBIDDEN");
+  }
+}
+
+/**
+ * Throws unless the logged-in user is the field officer (technician) the
+ * complaint is assigned to. Returns the complaint on success.
+ */
+async function assertAssignedTechnician(complaintId: number) {
+  const user = await getCurrentUser();
+  if (user.role !== "TECHNICIAN") {
+    throw new Error("FORBIDDEN");
+  }
+  const technician = await TechnicianService.getByUserId(user.id);
+  const complaint = await ComplaintService.getById(complaintId);
+  if (!technician || !complaint || complaint.technicianId !== technician.id) {
+    throw new Error("FORBIDDEN");
+  }
+  return complaint;
+}
 
 export async function createComplaint(
   formData: FormData,
@@ -50,10 +77,27 @@ export async function updateComplaint(
   revalidatePath("/dashboard/complaints");
 }
 
+// ADMIN routes a complaint to a field officer; status stays PENDING until the
+// officer schedules it.
+export async function assignTechnician(
+  complaintId: number,
+  technicianId: number,
+) {
+  await assertAdmin();
+
+  await ComplaintService.assign(complaintId, technicianId);
+
+  revalidatePath("/dashboard/complaints/" + complaintId);
+  revalidatePath("/dashboard/complaints");
+}
+
+// The assigned field officer sets the execution date, moving it to IN_PROGRESS.
 export async function scheduleComplaint(
   complaintId: number,
-  input: { technicianId: number; scheduledAt: Date },
+  input: { scheduledAt: Date },
 ) {
+  await assertAssignedTechnician(complaintId);
+
   await ComplaintService.schedule(complaintId, input);
 
   revalidatePath("/dashboard/complaints/" + complaintId);
@@ -61,6 +105,8 @@ export async function scheduleComplaint(
 }
 
 export async function submitEvidence(complaintId: number, formData: FormData) {
+  await assertAssignedTechnician(complaintId);
+
   const files = formData
     .getAll("files")
     .filter((f) => f instanceof File && f.size > 0) as File[];
@@ -79,6 +125,8 @@ export async function cancelComplaint(complaintId: number) {
 }
 
 export async function deleteComplaint(complaintId: number) {
+  await assertAdmin();
+
   await ComplaintService.delete(complaintId);
 
   revalidatePath("/dashboard/complaints");

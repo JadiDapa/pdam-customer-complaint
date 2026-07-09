@@ -3,8 +3,10 @@ import { UserService } from "@/servers/services/user.service";
 import DynamicBreadcrumb from "@/components/root/DynamicBreadcrumb";
 import UserStats from "@/components/root/user/UserStats";
 import UserTable from "@/components/root/user/UserTable";
+import { requireRole } from "@/app/actions/user.actions";
 
 export default async function UserPage() {
+  await requireRole(["ADMIN"]);
   const users = await UserService.getAll();
 
   return (

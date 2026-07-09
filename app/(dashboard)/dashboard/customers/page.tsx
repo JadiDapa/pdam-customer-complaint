@@ -5,8 +5,10 @@ import CreateCustomerDialog from "@/components/root/user/customer/CreateCustomer
 import ImportCustomersDialog from "@/components/root/user/customer/ImportCustomersDialog";
 import CustomerStats from "@/components/root/user/customer/CustomerStats";
 import CustomerTable from "@/components/root/user/customer/CustomerTable";
+import { requireRole } from "@/app/actions/user.actions";
 
 export default async function CustomerPage() {
+  await requireRole(["ADMIN"]);
   const customers = await CustomerService.getAll();
   const activeThisMonth = customers.filter((c) => c.complaints.length > 0).length;
 

@@ -13,7 +13,7 @@ type Props = {
 export default async function AdminLayout({ children }: Props) {
   const user = await getCurrentUser();
 
-  if (user.role === "CUSTOMER" || user.role === "TECHNICIAN") {
+  if (user.role === "CUSTOMER") {
     redirect("/");
   }
 
@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: Props) {
 
           <div className="flex flex-1 overflow-hidden md:ps-26">
             <div className="fixed left-0 hidden md:block">
-              <DashboardSidebar />
+              <DashboardSidebar role={user.role} />
             </div>
             <main className="flex w-full flex-col gap-2 overflow-hidden px-4 py-6 md:px-0 md:pe-6">
               {children}

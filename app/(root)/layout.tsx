@@ -10,7 +10,7 @@ type Props = {
 export default async function CustomerLayout({ children }: Props) {
   const user = await getCurrentUser();
 
-  if (user.role === "ADMIN") {
+  if (user.role === "ADMIN" || user.role === "TECHNICIAN") {
     redirect("/dashboard");
   }
 

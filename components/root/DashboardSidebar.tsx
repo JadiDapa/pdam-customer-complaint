@@ -10,6 +10,7 @@ import {
   Users,
   UserCheck,
   UserCog,
+  LucideIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
@@ -22,20 +23,32 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { UserRole } from "@/generated/prisma";
 
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Complaints", url: "/dashboard/complaints", icon: Activity },
-  { title: "Customers", url: "/dashboard/customers", icon: UserCheck },
-  { title: "Technicians", url: "/dashboard/technicians", icon: UserCog },
-  { title: "Users", url: "/dashboard/users", icon: Users },
+const menuItems: {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  roles: UserRole[];
+}[] = [
+  { title: "Dashboard", url: "/dashboard", icon: Home, roles: ["ADMIN"] },
+  {
+    title: "Complaints",
+    url: "/dashboard/complaints",
+    icon: Activity,
+    roles: ["ADMIN", "TECHNICIAN"],
+  },
+  { title: "Customers", url: "/dashboard/customers", icon: UserCheck, roles: ["ADMIN"] },
+  { title: "Technicians", url: "/dashboard/technicians", icon: UserCog, roles: ["ADMIN"] },
+  { title: "Users", url: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
 ];
 
 const bottomItems = [
   { title: "Pengaturan", url: "/dashboard/settings", icon: Settings },
 ];
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ role }: { role: UserRole }) {
+  const visibleItems = menuItems.filter((item) => item.roles.includes(role));
   const pathname = usePathname();
   const { signOut } = useClerk();
   const { resolvedTheme, setTheme } = useTheme();
@@ -94,7 +107,7 @@ export default function DashboardSidebar() {
 
         {/* ── Menu Items ── */}
         <nav className="bg-card flex max-h-fit flex-1 flex-col items-center gap-2 rounded-full p-1">
-          {menuItems.map((item) => {
+          {visibleItems.map((item) => {
             const active =
               item.url === "/dashboard"
                 ? pathname === "/dashboard"

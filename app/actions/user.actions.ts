@@ -9,6 +9,7 @@ import { UserService } from "@/servers/services/user.service";
 import z from "zod";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { UserRole } from "@/generated/prisma";
 
 export async function getCurrentUser() {
   const clerkUser = await currentUser();
@@ -28,6 +29,22 @@ export async function getCurrentUser() {
     redirect("/sign-in");
   }
 
+  return user;
+}
+
+/**
+ * Ensures the logged-in user has one of the allowed roles.
+ * Redirects away (or throws, for mutations) when the role is not permitted.
+ * Returns the current user so callers can reuse it.
+ */
+export async function requireRole(
+  roles: UserRole[],
+  redirectTo = "/dashboard/complaints",
+) {
+  const user = await getCurrentUser();
+  if (!roles.includes(user.role)) {
+    redirect(redirectTo);
+  }
   return user;
 }
 

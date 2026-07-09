@@ -1,5 +1,5 @@
 import { ComplaintService } from "@/servers/services/complaint.service";
-import { getCurrentUser } from "@/app/actions/user.actions";
+import { requireRole } from "@/app/actions/user.actions";
 import PageHeader from "@/components/root/PageHeader";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
@@ -40,7 +40,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default async function AdminDashboardPage() {
-  const user = await getCurrentUser();
+  const user = await requireRole(["ADMIN"]);
 
   const [stats, monthlyData, recentComplaints] = await Promise.all([
     ComplaintService.getStats(),

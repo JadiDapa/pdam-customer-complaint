@@ -17,6 +17,7 @@ import {
   LogOut,
   Sun,
   Moon,
+  LucideIcon,
 } from "lucide-react";
 import {
   Sheet,
@@ -26,25 +27,42 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { User } from "@/generated/prisma";
+import { User, UserRole } from "@/generated/prisma";
 
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Complaints", url: "/dashboard/complaints", icon: Activity },
-  { title: "Customers", url: "/dashboard/customers", icon: UserCheck },
-  { title: "Technicians", url: "/dashboard/technicians", icon: UserCog },
-  { title: "Users", url: "/dashboard/users", icon: Users },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+const menuItems: {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  roles: UserRole[];
+}[] = [
+  { title: "Dashboard", url: "/dashboard", icon: Home, roles: ["ADMIN"] },
+  {
+    title: "Complaints",
+    url: "/dashboard/complaints",
+    icon: Activity,
+    roles: ["ADMIN", "TECHNICIAN"],
+  },
+  { title: "Customers", url: "/dashboard/customers", icon: UserCheck, roles: ["ADMIN"] },
+  { title: "Technicians", url: "/dashboard/technicians", icon: UserCog, roles: ["ADMIN"] },
+  { title: "Users", url: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
+  {
+    title: "Settings",
+    url: "/dashboard/settings",
+    icon: Settings,
+    roles: ["ADMIN", "TECHNICIAN"],
+  },
 ];
 
 export default function DashboardMobileHeader({ user }: { user: User }) {
   const pathname = usePathname();
+  const visibleItems = menuItems.filter((item) => item.roles.includes(user.role));
   const { signOut } = useClerk();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -90,7 +108,7 @@ export default function DashboardMobileHeader({ user }: { user: User }) {
           </div>
 
           <nav className="flex flex-1 flex-col gap-1 py-2">
-            {menuItems.map((item) => {
+            {visibleItems.map((item) => {
               const active =
                 item.url === "/dashboard"
                   ? pathname === "/dashboard"

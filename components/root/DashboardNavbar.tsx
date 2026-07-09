@@ -2,23 +2,24 @@
 
 import { Bell, Search, ChevronDown, LogOut } from "lucide-react";
 import Image from "next/image";
-import { User } from "@/generated/prisma";
+import { User, UserRole } from "@/generated/prisma";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useClerk } from "@clerk/nextjs";
 
-const NAV_LINKS = [
-  { title: "Dashboard", url: "/dashboard" },
-  { title: "Complaints", url: "/dashboard/complaints" },
-  { title: "Customers", url: "/dashboard/customers" },
-  { title: "Technicians", url: "/dashboard/technicians" },
-  { title: "Users", url: "/dashboard/users" },
+const NAV_LINKS: { title: string; url: string; roles: UserRole[] }[] = [
+  { title: "Dashboard", url: "/dashboard", roles: ["ADMIN"] },
+  { title: "Complaints", url: "/dashboard/complaints", roles: ["ADMIN", "TECHNICIAN"] },
+  { title: "Customers", url: "/dashboard/customers", roles: ["ADMIN"] },
+  { title: "Technicians", url: "/dashboard/technicians", roles: ["ADMIN"] },
+  { title: "Users", url: "/dashboard/users", roles: ["ADMIN"] },
 ];
 
 export default function DashboardNavbar({ user }: { user: User }) {
   const pathname = usePathname();
   const { signOut } = useClerk();
+  const navLinks = NAV_LINKS.filter((link) => link.roles.includes(user.role));
 
   return (
     <header className="hidden w-full grid-cols-4 items-center justify-between rounded-2xl px-2 py-3 md:grid">
@@ -43,7 +44,7 @@ export default function DashboardNavbar({ user }: { user: User }) {
       {/* Center Nav */}
       <div className="col-span-2 flex items-center justify-center">
         <nav className="border-border bg-card flex max-w-fit items-center justify-center gap-1 rounded-full px-2 py-1.5">
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const isActive =
               link.url === "/dashboard"
                 ? pathname === "/dashboard"

@@ -4,8 +4,10 @@ import { TechnicianService } from "@/servers/services/technician.service";
 import TechnicianTable from "@/components/root/user/technician/TechnicianTable";
 import TechnicianStats from "@/components/root/user/technician/TechnicianStats";
 import CreateTechnicianDialog from "@/components/root/user/technician/CreateTechnicianDialog";
+import { requireRole } from "@/app/actions/user.actions";
 
 export default async function TechnicianPage() {
+  await requireRole(["ADMIN"]);
   const technicians = await TechnicianService.getAll();
   const activeThisMonth = technicians.filter((t) => t.complaints.length > 0).length;
 

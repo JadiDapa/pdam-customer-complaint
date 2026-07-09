@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FileDown } from "lucide-react";
 import { ComplaintService } from "@/servers/services/complaint.service";
 import { TechnicianService } from "@/servers/services/technician.service";
+import { getCurrentUser } from "@/app/actions/user.actions";
 import DynamicBreadcrumb from "@/components/root/DynamicBreadcrumb";
 import PageHeader from "@/components/root/PageHeader";
 import ComplaintDetail from "@/components/root/complaints/detail/ComplaintDetail";
@@ -14,9 +15,18 @@ interface PageProps {
 
 export default async function ComplaintDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const complaint = await ComplaintService.getById(Number(id));
+  const [complaint, user] = await Promise.all([
+    ComplaintService.getById(Number(id)),
+    getCurrentUser(),
+  ]);
 
   if (!complaint) notFound();
+
+  // Field officers may only open complaints assigned to them.
+  if (user.role === "TECHNICIAN") {
+    const tech = await TechnicianService.getByUserId(user.id);
+    if (!tech || complaint.technicianId !== tech.id) notFound();
+  }
 
   const technicians = await TechnicianService.getAll();
 
@@ -41,7 +51,11 @@ export default async function ComplaintDetailPage({ params }: PageProps) {
         )}
       </div>
 
-      <ComplaintDetail complaint={complaint} technicians={technicians} />
+      <ComplaintDetail
+        complaint={complaint}
+        technicians={technicians}
+        role={user.role}
+      />
     </main>
   );
 }
